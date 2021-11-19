@@ -4,6 +4,6 @@
 
  - [My youtube channel's "Addictive Synthesis" playlist ](https://www.youtube.com/watch?v=el0n1Baz8rg&list=PLg5_83tlBxnpsB1MY3rzBW0DkPemLgTyP&index=2)
 
- - [Bob Miller's youtube channel](https://www.youtube.com/user/kernlbob/featured)
+ - [Bob Miller's Deep Synth](https://www.youtube.com/watch?v=wK5Sz6IzRqE)
 
  - [Dual-core ESP32 operation code](https://gist.github.com/9715aadec1a350504de06f6217da85a9.git)
