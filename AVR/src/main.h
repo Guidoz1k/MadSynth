@@ -5,4 +5,4 @@
 
 int main(void);
 
-#endif /* __CUSTOM_H */
+#endif /* __MAIN_H */

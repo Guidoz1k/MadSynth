@@ -1,9 +1,8 @@
 #include "lcd.h"
 /*
-	Display:
-		PORTA 0 - 7     ==> data 0 - 7
-		PORTC 0, 1  	==> E, RS
-
+Display:
+	PORTA 0 - 7     ==> data 0 - 7
+	PORTC 0, 1  	==> E, RS
 */
 
 static void nopi(void){  // 1us

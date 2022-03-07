@@ -12,4 +12,4 @@ void lcdPos(uint8_t line, uint8_t pos);
 
 void displayInit();
 
-#endif /* __CUSTOM_H */
+#endif /* __LCD_H */
