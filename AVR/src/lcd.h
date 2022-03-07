@@ -4,12 +4,12 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-void lcdFlush(void);
+void lcd_flush(void);
 
-void lcdWrite(uint8_t data);
+void lcd_write(uint8_t data);
 
-void lcdPos(uint8_t line, uint8_t pos);
+void lcd_pos(uint8_t line, uint8_t pos);
 
-void displayInit();
+void display_init();
 
 #endif /* __LCD_H */

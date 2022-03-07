@@ -23,16 +23,16 @@ ISR(TIMER0_COMPA_vect){
 // asynchronous main loop
 void loop(){
     lag(500);
-    ledTOGGLE();
+    led_toggle();
 }
 
 // main function
 int main(){
-    displayInit();  // initialize the display pins and functions
-    onboardInit();  // initialize the onboard components pins and functions
-    serialInit();   // initialize the serial pins and functions
+    display_init();  // initialize the display pins and functions
+    onboard_init();  // initialize the onboard components pins and functions
+    serial_init();   // initialize the serial pins and functions
 
-    timerInit();    // initialize the timer functions
+    timer_init();    // initialize the timer functions
 
     while(1){
         loop();

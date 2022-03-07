@@ -1,6 +1,6 @@
 #include "timer.h"
 
-void timerInit(void){
+void timer_init(void){
     // interrupt config (1ms)
 	sei();				// global interrupts enable
 	TCCR0A  = 0x02;		// timer0 CTC mode

@@ -56,7 +56,7 @@ static void lcdConfig(uint8_t data){
 }
 
 // resets the LCD
-void lcdFlush(void){
+void lcd_flush(void){
     uint16_t i;
 
     lcdRS(0);
@@ -70,7 +70,7 @@ void lcdFlush(void){
 }
 
 // write to the LCD screen
-void lcdWrite(uint8_t data){
+void lcd_write(uint8_t data){
     lcdRS(0);
 	lcdData(data);
 	lcdRS(1);
@@ -80,7 +80,7 @@ void lcdWrite(uint8_t data){
 }
 
 // sets LCD cursor position
-void lcdPos(uint8_t line, uint8_t pos){
+void lcd_pos(uint8_t line, uint8_t pos){
 	if(line)			// display second line
 		pos |= 0x40;	// pos 0 of second line is memory position 0x40
 	pos |= 0x80;		// config bit set
@@ -88,13 +88,13 @@ void lcdPos(uint8_t line, uint8_t pos){
 }
 
 // initialize LCD functions
-void displayInit(){
+void display_init(){
 	DDRA = 0xFF;	// PORTB is output
 	DDRC |= 0x03;	// PORTC is output (bits 0 and 1)
 
 	lcdConfig(0x06);	// display automatic cursor increment
 	lcdConfig(0x0c);	// active display with hidden cursor
 	lcdConfig(0x38);	// bit and pixel format
-	lcdFlush();
+	lcd_flush();
 }
 

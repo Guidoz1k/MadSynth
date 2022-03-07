@@ -4,14 +4,14 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-void ledTOGGLE(void);
+void led_toggle(void);
 
-void ledOUTPUT(uint8_t bit);
+void led_output(uint8_t bit);
 
-void ledOFF(void);
+void led_off(void);
 
-void ledON(void);
+void led_on(void);
 
-void onboardInit();
+void onboard_init();
 
 #endif /* __ONBOARD_H */

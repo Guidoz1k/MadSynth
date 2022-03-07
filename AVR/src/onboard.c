@@ -6,32 +6,32 @@ PORTB 7     ==> onboard LED
 
 static uint8_t led_state = 0;
 
-void ledTOGGLE(void){
+void led_toggle(void){
     if(led_state)
-        ledOFF();
+        led_off();
     else
-        ledON();
+        led_on();
 
 }
 
-void ledOUTPUT(uint8_t bit){
+void led_output(uint8_t bit){
     if(bit)
-        ledON();
+        led_on();
     else
-        ledOFF();
+        led_off();
 }
 
-void ledOFF(void){
+void led_off(void){
     led_state = 0;
     PORTB &= 0b01111111;    // resets PORTB bit 7
 }
 
-void ledON(void){
+void led_on(void){
     led_state = 1;
     PORTB |= 0b10000000;    // sets PORTB bit 7
 }
 
-void onboardInit(){
+void onboard_init(){
 	DDRB |= 0b10000000;	// PORTB 7 OUTPUT
-    ledOFF();
+    led_off();
 }

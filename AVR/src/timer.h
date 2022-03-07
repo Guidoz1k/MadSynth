@@ -4,6 +4,6 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-void timerInit(void);
+void timer_init(void);
 
 #endif /* __TIMER_H */
