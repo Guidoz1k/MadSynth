@@ -5,7 +5,8 @@ Display:
 	PORTC 0, 1  	==> E, RS
 */
 
-static void nopi(void){  // 1us
+// makeshift kludge 1us imprecise delay
+static void nopi(void){
     __asm__("nop\n\t");
     __asm__("nop\n\t");
     __asm__("nop\n\t");
@@ -13,10 +14,12 @@ static void nopi(void){  // 1us
     __asm__("nop\n\t");
 }
 
+// ouput data bus
 static void lcdData(uint8_t data){
 	PORTA = data;
 }
 
+// output RS bit
 static void lcdRS(uint8_t RS){
     if(RS)
         PORTC |= 0x02;
@@ -24,6 +27,7 @@ static void lcdRS(uint8_t RS){
         PORTC &= 0xFD;
 }
 
+// output E bit
 static void lcdE(uint8_t E){
     if(E)
         PORTC |= 0x01;
@@ -31,6 +35,7 @@ static void lcdE(uint8_t E){
         PORTC &= 0xFE;
 }
 
+// output the LCD enable pulse
 static void lcdEnablePulse(void){
     uint8_t i;
 
@@ -41,6 +46,7 @@ static void lcdEnablePulse(void){
 		nopi();
 }
 
+// configure LCD through data bus
 static void lcdConfig(uint8_t data){
     lcdRS(0);
 	lcdData(data);
@@ -49,6 +55,7 @@ static void lcdConfig(uint8_t data){
 	lcdData(0x00);
 }
 
+// resets the LCD
 void lcdFlush(void){
     uint16_t i;
 
@@ -62,6 +69,7 @@ void lcdFlush(void){
 		nopi();
 }
 
+// write to the LCD screen
 void lcdWrite(uint8_t data){
     lcdRS(0);
 	lcdData(data);
@@ -71,6 +79,7 @@ void lcdWrite(uint8_t data){
 	lcdData(0x00);
 }
 
+// sets LCD cursor position
 void lcdPos(uint8_t line, uint8_t pos){
 	if(line)			// display second line
 		pos |= 0x40;	// pos 0 of second line is memory position 0x40
@@ -78,6 +87,7 @@ void lcdPos(uint8_t line, uint8_t pos){
 	lcdConfig(pos);
 }
 
+// initialize LCD functions
 void displayInit(){
 	DDRA = 0xFF;	// PORTB is output
 	DDRC |= 0x03;	// PORTC is output (bits 0 and 1)
@@ -87,5 +97,4 @@ void displayInit(){
 	lcdConfig(0x38);	// bit and pixel format
 	lcdFlush();
 }
-
 
