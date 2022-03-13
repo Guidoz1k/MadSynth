@@ -51,6 +51,7 @@ int main(){
     serial_init();      // initialize the serial pins and functions
     keyboard_init();    // initialize the keyboard pins and functions
     ui_init();          // initialize the UI buttons and encoder pins and functions
+    adc_init();         // initialize the ADC pins and functions
 
     timer_init();       // initialize the timer functions
 	sei();				// global interrupts enable

@@ -7,6 +7,8 @@
 #include "timer.h"
 #include "serial.h"
 #include "keyboard.h"
+#include "ui.h"
+#include "anal.h"
 
 int main(void);
 
