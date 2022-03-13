@@ -38,9 +38,9 @@ ISR(TIMER0_COMPA_vect){
 
 // asynchronous main loop
 void loop(){
+
     lag(1000);
-    serial_transmit('x');
-    serial_transmit('\n');
+    serial_write_number(inputs_rotation(), 3, 1);
 }
 
 // main function

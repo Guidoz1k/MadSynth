@@ -32,7 +32,39 @@ static void serialWrite(byte data){
 	}
 
 // blocking function that sends one character over UART
-void serial_transmit(uint8_t character){
+static void serial_transmit(uint8_t character){
 	while(!serialWriteAvailable());
 	serialWrite(character);
+}
+
+void serial_write_string(const char *pointer, uint8_t newline){
+	uint8_t counter = 0;
+
+	while((counter++ < MAXSIZE) && (*pointer != '\0')){
+		serial_transmit(*(pointer++));
+	}
+	if(newline)
+		serial_transmit('\n');
+}
+
+void serial_write_number(uint16_t number, uint8_t size, uint8_t newline){
+	char character = 0;
+	uint32_t ten = 0;
+	int8_t i, j;
+
+	for(i = size - 1; i >= 0; i--){
+		ten = 1;
+		for(j = 1; j <= i; j++)
+			ten *= 10;
+
+		if(i < size)
+			character = ((number / ten) % 10) + 48;
+		else
+			character = (number / ten) + 48;
+
+		serial_transmit(character);
+	}
+	if(newline)
+		serial_transmit('\n');
+
 }

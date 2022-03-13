@@ -13,11 +13,11 @@
 */
 
 void adc_init(void){
-    // ADMUX = 0b01000000;  // verificar AREF
+    ADMUX = 0b01000000;     // verificar AREF
     ADCSRA = 0b10000000;    // turns ADC on
     DDRF = 0;               // all pins are inputs
     DIDR0 = 0xFF;           // turns digital input off
-    read_adc(0);            // performs first conversion to initialize the ADC
+    adc_read(0);            // performs first conversion to initialize the ADC
 }
 
 uint16_t adc_read(uint8_t pin){

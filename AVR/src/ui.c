@@ -59,8 +59,15 @@ uint8_t inputs_read(uint8_t input){
     return data;
 }
 
+uint8_t inputs_rotation(void){
+    int8_t old_r = rotation;
+
+    rotation = 0;
+    return old_r;
+}
+
 void ui_init(void){
-    PORTB = 0;  // every pin is an input
+    DDRB = 0;  // every pin is an input
 
     PCMSK0 = 0b00000011;    // enables interrupt for pins PCINT0 and PCINT1 (PORTB 0 and 1)
     PCICR = 1;              // enables Pin Change Interrupt for pins PCINT 0 to 7

@@ -158,13 +158,13 @@ void lcd_write_number(uint16_t number, uint8_t size, uint8_t line, uint8_t pos){
 	uint8_t sector = 0;
 	char character = 0;
 	uint32_t ten = 0;
-	uint8_t i, j;
+	int8_t i, j;
 
 	if(line > 1)
 		sector = 1;
 	lcd_pos(line, pos);
 
-	for(i = size; i >= 0; i--){
+	for(i = size - 1; i >= 0; i--){
 		ten = 1;
 		for(j = 1; j <= i; j++)
 			ten *= 10;
