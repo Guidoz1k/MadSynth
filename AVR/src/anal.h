@@ -6,6 +6,6 @@
 
 void adc_init(void);
 
-uint16_t read_adc(uint8_t pin);
+uint16_t adc_read(uint8_t pin);
 
 #endif /* __ANAL_H */

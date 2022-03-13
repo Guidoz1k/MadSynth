@@ -4,11 +4,9 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-void lcd_flush(void);
+void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos);
 
-void lcd_write(uint8_t data, uint8_t sector);
-
-void lcd_pos(uint8_t line, uint8_t pos);
+void lcd_write_number(uint16_t number, uint8_t size, uint8_t line, uint8_t pos);
 
 void display_init();
 

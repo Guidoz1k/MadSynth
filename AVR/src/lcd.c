@@ -80,7 +80,7 @@ static void lcdConfig(uint8_t data, uint8_t sector){
 }
 
 // resets the LCD
-void lcd_flush(void){
+static void lcd_flush(void){
     uint16_t i;
 
     lcdRS(0);
@@ -98,7 +98,7 @@ void lcd_flush(void){
 }
 
 // write to the LCD screen
-void lcd_write(uint8_t data, uint8_t sector){
+static void lcd_write(uint8_t data, uint8_t sector){
     lcdRS(0);
 	lcdData(data);
 	lcdRS(1);
@@ -111,7 +111,7 @@ void lcd_write(uint8_t data, uint8_t sector){
 }
 
 // sets LCD cursor position
-void lcd_pos(uint8_t line, uint8_t pos){
+static void lcd_pos(uint8_t line, uint8_t pos){
 	if(line)			// display second line
 		pos |= 0x40;	// pos 0 of second line is memory position 0x40
 	pos |= 0x80;		// config bit set
@@ -139,5 +139,43 @@ void display_init(){
 	lcdConfig(0x38, 1);	// bit and pixel format
 
 	lcd_flush();
+}
+
+void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos){
+	uint8_t sector = 0;
+	uint8_t counter = 0;
+
+	if(line > 1)
+		sector = 1;
+	lcd_pos(line, pos);
+
+	while((counter++ < (40 - pos)) && (*pointer != '\0')){
+		lcd_write(*(pointer++), sector);
+	}
+}
+
+void lcd_write_number(uint16_t number, uint8_t size, uint8_t line, uint8_t pos){
+	uint8_t sector = 0;
+	char character = 0;
+	uint32_t ten = 0;
+	uint8_t i, j;
+
+	if(line > 1)
+		sector = 1;
+	lcd_pos(line, pos);
+
+	for(i = size; i >= 0; i--){
+		ten = 1;
+		for(j = 1; j <= i; j++)
+			ten *= 10;
+
+		if(i < size)
+			character = ((number / ten) % 10) + 48;
+		else
+			character = (number / ten) + 48;
+
+		lcd_write(character, sector);
+	}
+
 }
 

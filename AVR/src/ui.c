@@ -43,7 +43,7 @@ ISR(PCINT0_vect){
 
 }
 
-uint8_t read_inputs(uint8_t input){
+uint8_t inputs_read(uint8_t input){
 /*  input   button
     0       encoder
     1       up

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-uint8_t read_inputs(uint8_t input);
+uint8_t inputs_read(uint8_t input);
 
 void ui_init(void);
 

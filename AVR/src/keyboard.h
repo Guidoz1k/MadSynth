@@ -6,6 +6,6 @@
 
 void keyboard_init(void);
 
-uint8_t read_keyboard(uint8_t position);
+uint8_t keyboard_read(uint8_t position);
 
 #endif /* __KEYBOARD_H */

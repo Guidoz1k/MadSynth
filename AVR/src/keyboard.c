@@ -16,7 +16,7 @@ void keyboard_init(void){
     PORTA = 0;
 }
 
-uint8_t read_keyboard(uint8_t position){
+uint8_t keyboard_read(uint8_t position){
     uint8_t output = 0;
 
     // PORTA = column number | (Row number << 3); for more information check the "1 - keyboard layout.xlsx"

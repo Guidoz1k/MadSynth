@@ -20,7 +20,7 @@ void adc_init(void){
     read_adc(0);            // performs first conversion to initialize the ADC
 }
 
-uint16_t read_adc(uint8_t pin){
+uint16_t adc_read(uint8_t pin){
     uint16_t result = 0;
 
     ADMUX |= pin;                   // select the channel via internal mux
