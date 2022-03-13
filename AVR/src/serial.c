@@ -1,9 +1,14 @@
 #include "serial.h"
+/*
+    PORTE:
+        0   RX pin
+        1   TX pin
+*/
 
 // initialize the serial peripheral
 void serial_init(void){
 	UBRR0H = 0x00;
-	UBRR0L = 0x22;		// baud rate of 57600 equals to UBRR = 34
+	UBRR0L = 0x10;		// baud rate of 115200 equals to UBRR = 16
 	UCSR0A = 0x02;		// U2Xn = 1 so the baud rate is B = (f_osc / (UBRR + 1)) / 8
 	UCSR0B = 0x18;		// enables RX and TX
 	UCSR0C = 0x06;		// set frame format: 8data

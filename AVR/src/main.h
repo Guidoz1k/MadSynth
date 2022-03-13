@@ -6,6 +6,7 @@
 #include "onboard.h"
 #include "timer.h"
 #include "serial.h"
+#include "keyboard.h"
 
 int main(void);
 

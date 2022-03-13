@@ -1,8 +1,10 @@
 #include "lcd.h"
 /*
-Display:
-	PORTA 0 - 7     ==> data 0 - 7
-	PORTC 0, 1  	==> E, RS
+    PORTC: data 0 - 7
+    PORTE:
+        3   RS pin
+        4   E1 pin
+    	5   E2 pin
 */
 
 // makeshift kludge 1us imprecise delay
@@ -16,42 +18,64 @@ static void nopi(void){
 
 // ouput data bus
 static void lcdData(uint8_t data){
-	PORTA = data;
+	PORTC = data;
 }
 
 // output RS bit
 static void lcdRS(uint8_t RS){
     if(RS)
-        PORTC |= 0x02;
+        PORTE |= 0x08;
     else
-        PORTC &= 0xFD;
+        PORTE &= 0xF7;
 }
 
-// output E bit
-static void lcdE(uint8_t E){
+// output E1 bit
+static void lcdE1(uint8_t E){
     if(E)
-        PORTC |= 0x01;
+        PORTC |= 0x10;
     else
-        PORTC &= 0xFE;
+        PORTC &= 0xEF;
 }
 
-// output the LCD enable pulse
-static void lcdEnablePulse(void){
+// output the LCD enable UP pulse
+static void lcdEnablePulse1(void){
     uint8_t i;
 
-    lcdE(1);
+    lcdE1(1);
 	nopi();						// 1us min delay
-	lcdE(0);
+	lcdE1(0);
+	for(i = 0; i < 36; i++)     // 40us min delay
+		nopi();
+}
+
+// output E1 bit
+static void lcdE2(uint8_t E){
+    if(E)
+        PORTC |= 0x20;
+    else
+        PORTC &= 0xDF;
+}
+
+// output the LCD enable DOWN pulse
+static void lcdEnablePulse2(void){
+    uint8_t i;
+
+    lcdE2(1);
+	nopi();						// 1us min delay
+	lcdE2(0);
 	for(i = 0; i < 36; i++)     // 40us min delay
 		nopi();
 }
 
 // configure LCD through data bus
-static void lcdConfig(uint8_t data){
+static void lcdConfig(uint8_t data, uint8_t sector){
     lcdRS(0);
 	lcdData(data);
 	nopi();
-	lcdEnablePulse();
+	if(sector == 0)
+		lcdEnablePulse1();
+	else
+		lcdEnablePulse2();
 	lcdData(0x00);
 }
 
@@ -61,20 +85,27 @@ void lcd_flush(void){
 
     lcdRS(0);
 	lcdData(0x01);
-    lcdE(1);
+    lcdE1(1);
 	nopi();         // 1us min delay
-	lcdE(0);
+	lcdE1(0);
+	nopi();
+    lcdE2(1);
+	nopi();         // 1us min delay
+	lcdE2(0);
 
 	for(i = 0; i < 1400; i++)	// 1.65ms min delay
 		nopi();
 }
 
 // write to the LCD screen
-void lcd_write(uint8_t data){
+void lcd_write(uint8_t data, uint8_t sector){
     lcdRS(0);
 	lcdData(data);
 	lcdRS(1);
-	lcdEnablePulse();
+	if(sector == 0)
+		lcdEnablePulse1();
+	else
+		lcdEnablePulse2();
 	lcdRS(0);
 	lcdData(0x00);
 }
@@ -84,7 +115,13 @@ void lcd_pos(uint8_t line, uint8_t pos){
 	if(line)			// display second line
 		pos |= 0x40;	// pos 0 of second line is memory position 0x40
 	pos |= 0x80;		// config bit set
-	lcdConfig(pos);
+
+	if(line < 2)
+		lcdConfig(pos, 0);
+	else{
+		line -= 2;
+		lcdConfig(pos, 1);
+	}
 }
 
 // initialize LCD functions
@@ -92,9 +129,15 @@ void display_init(){
 	DDRA = 0xFF;	// PORTB is output
 	DDRC |= 0x03;	// PORTC is output (bits 0 and 1)
 
-	lcdConfig(0x06);	// display automatic cursor increment
-	lcdConfig(0x0c);	// active display with hidden cursor
-	lcdConfig(0x38);	// bit and pixel format
+	// first sector
+	lcdConfig(0x06, 0);	// display automatic cursor increment
+	lcdConfig(0x0c, 0);	// active display with hidden cursor
+	lcdConfig(0x38, 0);	// bit and pixel format
+	// second sector
+	lcdConfig(0x06, 1);	// display automatic cursor increment
+	lcdConfig(0x0c, 1);	// active display with hidden cursor
+	lcdConfig(0x38, 1);	// bit and pixel format
+
 	lcd_flush();
 }
 

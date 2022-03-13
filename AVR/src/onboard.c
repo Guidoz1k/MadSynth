@@ -1,7 +1,6 @@
 #include "onboard.h"
-
 /*
-PORTB 7     ==> onboard LED
+    PORTB 7 --> onboard LED
 */
 
 static uint8_t led_state = 0;

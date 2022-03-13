@@ -6,7 +6,7 @@
 
 void lcd_flush(void);
 
-void lcd_write(uint8_t data);
+void lcd_write(uint8_t data, uint8_t sector);
 
 void lcd_pos(uint8_t line, uint8_t pos);
 
