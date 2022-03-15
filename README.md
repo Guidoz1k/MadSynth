@@ -10,8 +10,9 @@
 
 
 First version          | Second version          | Third version           | Fourth version          | Fifth version
+:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
 (simple signal gen)    | (Deep Note project)     |                         | (used in the MES course)| (MadSynth's final version)
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
-![](https://i.imgur.com/uQDNU33.png) | ![](https://i.imgur.com/jkJ7Mzw.png) | "[](https://i.imgur.com/aatGlXY.png) | ![](https://i.imgur.com/bMaZ94R.png) | ![](https://i.imgur.com/RAk690x.png)
+![](https://i.imgur.com/TdHkZdt.png) | ![](https://i.imgur.com/2VIc12S.png) | "[](https://i.imgur.com/aatGlXY.png) | ![](https://i.imgur.com/bMaZ94R.png) | ![](https://i.imgur.com/RAk690x.png)
 
 
