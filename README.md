@@ -10,7 +10,7 @@
 
 
 The project was designed as follows:
-![](https://i.imgur.com/gUgCCDD.png)
+![](https://i.imgur.com/NLDJt5n.png)
 
 
 First version          | Second version          | Third version           | Fourth version          | Fifth version
