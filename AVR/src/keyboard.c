@@ -16,389 +16,387 @@ void keyboard_init(void){
     PORTA = 0;
 }
 
-uint8_t keyboard_read(uint8_t position){
-    uint8_t output = 0;
-
+void keyboard_write(uint8_t position){
     // PORTA = column number | (Row number << 3); for more information check the "1 - keyboard layout.xlsx"
     switch(position){
     // first edge (x)
     // first octave, x edge
-    case  1:
+    case  0:
         PORTA = 4 | (6 << 3);
         break;
-    case  2:
+    case  1:
         PORTA = 5 | (6 << 3);
         break;
-    case  3:
+    case  2:
         PORTA = 6 | (6 << 3);
         break;
-    case  4:
+    case  3:
         PORTA = 7 | (6 << 3);
         break;
-    case  5:
+    case  4:
         PORTA = 0 | (5 << 3);
         break;
-    case  6:
+    case  5:
         PORTA = 1 | (5 << 3);
         break;
-    case  7:
+    case  6:
         PORTA = 2 | (5 << 3);
         break;
-    case  8:
+    case  7:
         PORTA = 3 | (5 << 3);
         break;
-    case  9:
+    case  8:
         PORTA = 4 | (5 << 3);
         break;
-    case 10:
+    case  9:
         PORTA = 5 | (5 << 3);
         break;
-    case 11:
+    case 10:
         PORTA = 6 | (5 << 3);
         break;
-    case 12:
+    case 11:
         PORTA = 7 | (5 << 3);
         break;
     // second octave, x edge
-    case 13:
+    case 12:
         PORTA = 0 | (4 << 3);
         break;
-    case 14:
+    case 13:
         PORTA = 1 | (4 << 3);
         break;
-    case 15:
+    case 14:
         PORTA = 2 | (4 << 3);
         break;
-    case 16:
+    case 15:
         PORTA = 3 | (4 << 3);
         break;
-    case 17:
+    case 16:
         PORTA = 4 | (4 << 3);
         break;
-    case 18:
+    case 17:
         PORTA = 5 | (4 << 3);
         break;
-    case 19:
+    case 18:
         PORTA = 6 | (4 << 3);
         break;
-    case 20:
+    case 19:
         PORTA = 7 | (4 << 3);
         break;
-    case 21:
+    case 20:
         PORTA = 0 | (3 << 3);
         break;
-    case 22:
+    case 21:
         PORTA = 1 | (3 << 3);
         break;
-    case 23:
+    case 22:
         PORTA = 2 | (3 << 3);
         break;
-    case 24:
+    case 23:
         PORTA = 3 | (3 << 3);
         break;
     // third octave, x edge
-    case 25:
+    case 24:
         PORTA = 4 | (3 << 3);
         break;
-    case 26:
+    case 25:
         PORTA = 5 | (3 << 3);
         break;
-    case 27:
+    case 26:
         PORTA = 6 | (3 << 3);
         break;
-    case 28:
+    case 27:
         PORTA = 7 | (3 << 3);
         break;
-    case 29:
+    case 28:
         PORTA = 0 | (2 << 3);
         break;
-    case 30:
+    case 29:
         PORTA = 1 | (2 << 3);
         break;
-    case 31:
+    case 30:
         PORTA = 2 | (2 << 3);
         break;
-    case 32:
+    case 31:
         PORTA = 3 | (2 << 3);
         break;
-    case 33:
+    case 32:
         PORTA = 4 | (2 << 3);
         break;
-    case 34:
+    case 33:
         PORTA = 5 | (2 << 3);
         break;
-    case 35:
+    case 34:
         PORTA = 6 | (2 << 3);
         break;
-    case 36:
+    case 35:
         PORTA = 7 | (2 << 3);
         break;
     // fourth octave, x edge
-    case 37:
+    case 36:
         PORTA = 0 | (1 << 3);
         break;
-    case 38:
+    case 37:
         PORTA = 1 | (1 << 3);
         break;
-    case 39:
+    case 38:
         PORTA = 2 | (1 << 3);
         break;
-    case 40:
+    case 39:
         PORTA = 3 | (1 << 3);
         break;
-    case 41:
+    case 40:
         PORTA = 4 | (1 << 3);
         break;
-    case 42:
+    case 41:
         PORTA = 5 | (1 << 3);
         break;
-    case 43:
+    case 42:
         PORTA = 6 | (1 << 3);
         break;
-    case 44:
+    case 43:
         PORTA = 7 | (1 << 3);
         break;
-    case 45:
+    case 44:
         PORTA = 0 | (0 << 3);
         break;
-    case 46:
+    case 45:
         PORTA = 1 | (0 << 3);
         break;
-    case 47:
+    case 46:
         PORTA = 2 | (0 << 3);
         break;
-    case 48:
+    case 47:
         PORTA = 3 | (0 << 3);
         break;
     // fifth octave, x edge
-    case 49:
+    case 48:
         PORTA = 4 | (0 << 3);
         break;
-    case 50:
+    case 49:
         PORTA = 5 | (0 << 3);
         break;
-    case 51:
+    case 50:
         PORTA = 6 | (0 << 3);
         break;
-    case 52:
+    case 51:
         PORTA = 7 | (0 << 3);
         break;
-    case 53:
+    case 52:
         PORTA = 0 | (7 << 3);
         break;
-    case 54:
+    case 53:
         PORTA = 1 | (7 << 3);
         break;
-    case 55:
+    case 54:
         PORTA = 2 | (7 << 3);
         break;
-    case 56:
+    case 55:
         PORTA = 3 | (7 << 3);
         break;
-    case 57:
+    case 56:
         PORTA = 4 | (7 << 3);
         break;
-    case 58:
+    case 57:
         PORTA = 5 | (7 << 3);
         break;
-    case 59:
+    case 58:
         PORTA = 6 | (7 << 3);
         break;
-    case 60:
+    case 59:
         PORTA = 7 | (7 << 3);
         break;
     // sixth octave, x edge
-    case 61:
+    case 60:
         PORTA = 0 | (6 << 3);
         break;
     // second edge (y)
     // first octave, y edge 
-    case 62:
+    case 61:
         PORTA = 4 | ((6 + 8) << 3);
         break;
-    case 63:
+    case 62:
         PORTA = 5 | ((6 + 8) << 3);
         break;
-    case 64:
+    case 63:
         PORTA = 6 | ((6 + 8) << 3);
         break;
-    case 65:
+    case 64:
         PORTA = 7 | ((6 + 8) << 3);
         break;
-    case 66:
+    case 65:
         PORTA = 0 | ((5 + 8) << 3);
         break;
-    case 67:
+    case 66:
         PORTA = 1 | ((5 + 8) << 3);
         break;
-    case 68:
+    case 67:
         PORTA = 2 | ((5 + 8) << 3);
         break;
-    case 69:
+    case 68:
         PORTA = 3 | ((5 + 8) << 3);
         break;
-    case 70:
+    case 69:
         PORTA = 4 | ((5 + 8) << 3);
         break;
-    case 71:
+    case 70:
         PORTA = 5 | ((5 + 8) << 3);
         break;
-    case 72:
+    case 71:
         PORTA = 6 | ((5 + 8) << 3);
         break;
-    case 73:
+    case 72:
         PORTA = 7 | ((5 + 8) << 3);
         break;
     // second octave, y edge 
-    case 74:
+    case 73:
         PORTA = 0 | ((4 + 8) << 3);
         break;
-    case 75:
+    case 74:
         PORTA = 1 | ((4 + 8) << 3);
         break;
-    case 76:
+    case 75:
         PORTA = 2 | ((4 + 8) << 3);
         break;
-    case 77:
+    case 76:
         PORTA = 3 | ((4 + 8) << 3);
         break;
-    case 78:
+    case 77:
         PORTA = 4 | ((4 + 8) << 3);
         break;
-    case 79:
+    case 78:
         PORTA = 5 | ((4 + 8) << 3);
         break;
-    case 80:
+    case 79:
         PORTA = 6 | ((4 + 8) << 3);
         break;
-    case 81:
+    case 80:
         PORTA = 7 | ((4 + 8) << 3);
         break;
-    case 82:
+    case 81:
         PORTA = 0 | ((3 + 8) << 3);
         break;
-    case 83:
+    case 82:
         PORTA = 1 | ((3 + 8) << 3);
         break;
-    case 84:
+    case 83:
         PORTA = 2 | ((3 + 8) << 3);
         break;
-    case 85:
+    case 84:
         PORTA = 3 | ((3 + 8) << 3);
         break;
     // third octave, y edge 
-    case 86:
+    case 85:
         PORTA = 4 | ((3 + 8) << 3);
         break;
-    case 87:
+    case 86:
         PORTA = 5 | ((3 + 8) << 3);
         break;
-    case 88:
+    case 87:
         PORTA = 6 | ((3 + 8) << 3);
         break;
-    case 89:
+    case 88:
         PORTA = 7 | ((3 + 8) << 3);
         break;
-    case 90:
+    case 89:
         PORTA = 0 | ((2 + 8) << 3);
         break;
-    case 91:
+    case 90:
         PORTA = 1 | ((2 + 8) << 3);
         break;
-    case 92:
+    case 91:
         PORTA = 2 | ((2 + 8) << 3);
         break;
-    case 93:
+    case 92:
         PORTA = 3 | ((2 + 8) << 3);
         break;
-    case 94:
+    case 93:
         PORTA = 4 | ((2 + 8) << 3);
         break;
-    case 95:
+    case 94:
         PORTA = 5 | ((2 + 8) << 3);
         break;
-    case 96:
+    case 95:
         PORTA = 6 | ((2 + 8) << 3);
         break;
-    case 97:
+    case 96:
         PORTA = 7 | ((2 + 8) << 3);
         break;
     // fourth octave, y edge 
-    case 98:
+    case 97:
         PORTA = 0 | ((1 + 8) << 3);
         break;
-    case 99:
+    case 98:
         PORTA = 1 | ((1 + 8) << 3);
         break;
-    case 100:
+    case 99:
         PORTA = 2 | ((1 + 8) << 3);
         break;
-    case 101:
+    case 100:
         PORTA = 3 | ((1 + 8) << 3);
         break;
-    case 102:
+    case 101:
         PORTA = 4 | ((1 + 8) << 3);
         break;
-    case 103:
+    case 102:
         PORTA = 5 | ((1 + 8) << 3);
         break;
-    case 104:
+    case 103:
         PORTA = 6 | ((1 + 8) << 3);
         break;
-    case 105:
+    case 104:
         PORTA = 7 | ((1 + 8) << 3);
         break;
-    case 106:
+    case 105:
         PORTA = 0 | ((0 + 8) << 3);
         break;
-    case 107:
+    case 106:
         PORTA = 1 | ((0 + 8) << 3);
         break;
-    case 108:
+    case 107:
         PORTA = 2 | ((0 + 8) << 3);
         break;
-    case 109:
+    case 108:
         PORTA = 3 | ((0 + 8) << 3);
         break;
     // fifth octave, y edge 
-    case 110:
+    case 109:
         PORTA = 4 | ((0 + 8) << 3);
         break;
-    case 111:
+    case 110:
         PORTA = 5 | ((0 + 8) << 3);
         break;
-    case 112:
+    case 111:
         PORTA = 6 | ((0 + 8) << 3);
         break;
-    case 113:
+    case 112:
         PORTA = 7 | ((0 + 8) << 3);
         break;
-    case 114:
+    case 113:
         PORTA = 0 | ((7 + 8) << 3);
         break;
-    case 115:
+    case 114:
         PORTA = 1 | ((7 + 8) << 3);
         break;
-    case 116:
+    case 115:
         PORTA = 2 | ((7 + 8) << 3);
         break;
-    case 117:
+    case 116:
         PORTA = 3 | ((7 + 8) << 3);
         break;
-    case 118:
+    case 117:
         PORTA = 4 | ((7 + 8) << 3);
         break;
-    case 119:
+    case 118:
         PORTA = 5 | ((7 + 8) << 3);
         break;
-    case 120:
+    case 119:
         PORTA = 6 | ((7 + 8) << 3);
         break;
-    case 121:
+    case 120:
         PORTA = 7 | ((7 + 8) << 3);
         break;
     // sixth octave, y edge 
-    case 122:
+    case 121:
         PORTA = 0 | ((6 + 8) << 3);
         break;
     default:
@@ -406,6 +404,16 @@ uint8_t keyboard_read(uint8_t position){
     }
 
     __asm__("nop\n\t"); // delay for reading
+    __asm__("nop\n\t"); // delay for reading
+    __asm__("nop\n\t"); // delay for reading
+    __asm__("nop\n\t"); // delay for reading
+    __asm__("nop\n\t"); // delay for reading
+    __asm__("nop\n\t"); // delay for reading
+}
+
+uint8_t keyboard_read(void){
+    uint8_t output = 0;
+
     if(PINA & 0b10000000)
         output = 1;
 

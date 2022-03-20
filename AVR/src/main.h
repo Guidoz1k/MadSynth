@@ -10,6 +10,6 @@
 #include "ui.h"
 #include "anal.h"
 
-int main(void);
+#define MAXKEYS 122
 
 #endif /* __MAIN_H */

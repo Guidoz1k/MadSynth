@@ -39,27 +39,48 @@ ISR(PCINT0_vect){
                 rotation++;
             pin_b = new_b;
         }
-    
-
 }
 
-uint8_t inputs_read(uint8_t input){
+uint8_t inputs_read(void){
 /*  input   button
-    0       encoder
-    1       up
-    2       down
-    3       right
-    4       left
+    1       encoder
+    2       up
+    3       down
+    4       right
+    5       left
+    0       invalid or none
 */
-    uint8_t data = 0;
+    uint8_t input = 0;
+    uint8_t counter = 0;
 
-    if(PINB & (0b00000100 << input))
-        data = 1;
+    if((!PINB) & (0b00000100 << 0)){
+        input = 1;
+        counter++;
+    }
+    if((!PINB) & (0b00000100 << 1)){
+        input = 2;
+        counter++;
+    }
+    if((!PINB) & (0b00000100 << 2)){
+        input = 3;
+        counter++;
+    }
+    if((!PINB) & (0b00000100 << 3)){
+        input = 4;
+        counter++;
+    }
+    if((!PINB) & (0b00000100 << 4)){
+        input = 5;
+        counter++;
+    }
 
-    return data;
+    if(counter > 1)
+        input = 0;
+
+    return input;
 }
 
-uint8_t inputs_rotation(void){
+int8_t inputs_rotation(void){
     int8_t old_r = rotation;
 
     rotation = 0;

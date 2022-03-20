@@ -32,9 +32,9 @@ static void lcdRS(uint8_t RS){
 // output E1 bit
 static void lcdE1(uint8_t E){
     if(E)
-        PORTC |= 0x10;
+        PORTE |= 0x10;
     else
-        PORTC &= 0xEF;
+        PORTE &= 0xEF;
 }
 
 // output the LCD enable UP pulse
@@ -51,9 +51,9 @@ static void lcdEnablePulse1(void){
 // output E1 bit
 static void lcdE2(uint8_t E){
     if(E)
-        PORTC |= 0x20;
+        PORTE |= 0x20;
     else
-        PORTC &= 0xDF;
+        PORTE &= 0xDF;
 }
 
 // output the LCD enable DOWN pulse
@@ -69,6 +69,8 @@ static void lcdEnablePulse2(void){
 
 // configure LCD through data bus
 static void lcdConfig(uint8_t data, uint8_t sector){
+    uint8_t i;
+
     lcdRS(0);
 	lcdData(data);
 	nopi();
@@ -77,6 +79,9 @@ static void lcdConfig(uint8_t data, uint8_t sector){
 	else
 		lcdEnablePulse2();
 	lcdData(0x00);
+
+	for(i = 0; i < 36; i++)     // 40us min delay
+		nopi();
 }
 
 // resets the LCD
@@ -99,6 +104,8 @@ static void lcd_flush(void){
 
 // write to the LCD screen
 static void lcd_write(uint8_t data, uint8_t sector){
+    uint8_t i;
+
     lcdRS(0);
 	lcdData(data);
 	lcdRS(1);
@@ -108,26 +115,27 @@ static void lcd_write(uint8_t data, uint8_t sector){
 		lcdEnablePulse2();
 	lcdRS(0);
 	lcdData(0x00);
+
+	for(i = 0; i < 36; i++)     // 40us min delay
+		nopi();
 }
 
 // sets LCD cursor position
 static void lcd_pos(uint8_t line, uint8_t pos){
-	if(line)			// display second line
-		pos |= 0x40;	// pos 0 of second line is memory position 0x40
+	if((line == 1) || (line == 3))
+		pos |= 0x40;	// pos 0 of second and fourth lines is memory position 0x40
 	pos |= 0x80;		// config bit set
 
 	if(line < 2)
 		lcdConfig(pos, 0);
-	else{
-		line -= 2;
+	else
 		lcdConfig(pos, 1);
-	}
 }
 
 // initialize LCD functions
 void display_init(){
-	DDRA = 0xFF;	// PORTB is output
-	DDRC |= 0x03;	// PORTC is output (bits 0 and 1)
+	DDRC = 0xFF;		// PORTC is output
+	DDRE |=0b00111000;	// PORTE is output (bits 3, 4, 5)
 
 	// first sector
 	lcdConfig(0x06, 0);	// display automatic cursor increment
@@ -139,6 +147,7 @@ void display_init(){
 	lcdConfig(0x38, 1);	// bit and pixel format
 
 	lcd_flush();
+	lcd_pos(0, 0);
 }
 
 void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos){

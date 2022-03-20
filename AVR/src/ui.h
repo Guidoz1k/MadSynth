@@ -4,9 +4,9 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-uint8_t inputs_read(uint8_t input);
+uint8_t inputs_read(void);
 
-uint8_t inputs_rotation(void);
+int8_t inputs_rotation(void);
 
 void ui_init(void);
 
