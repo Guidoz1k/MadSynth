@@ -42,19 +42,22 @@ static void lag(uint16_t time){
 // 1ms interrupt function
 ISR(TIMER0_COMPA_vect){
     uint8_t i = 0;
+    uint8_t key = 0;
 
     if(timing)
         time_counter++;
 
     led_on();
-    for(i = 1; i < MAXKEYS; i++){
+    for(i = 0; i < MAXKEYS; i++){
         keyboard_write(i);
         if(i < 61){     // key's x pin
             if(keyboard_read()) // key's x == 1
                 switch(key_detection[i].stateMachine){
                 case 0:
+                    key_detection[i].stateMachine = 1;
                     break;
                 case 1:
+                    key_detection[i].counter++;
                     break;
                 case 2:
                     break;
@@ -74,14 +77,17 @@ ISR(TIMER0_COMPA_vect){
                 case 0:
                     break;
                 case 1:
+                    key_detection[i].stateMachine = 6;
                     break;
                 case 2:
                     break;
                 case 3:
+                    key_detection[i].stateMachine = 4;
                     break;
                 case 4:
                     break;
                 case 5:
+                    key_detection[i].stateMachine = 6;
                     break;
                 case 6:
                     break;
@@ -90,11 +96,13 @@ ISR(TIMER0_COMPA_vect){
                 }
         }
         else{           // key's y pin
+            key = i - 61;
             if(keyboard_read()) // key's y == 1
-                switch(key_detection[i].stateMachine){
+                switch(key_detection[key].stateMachine){
                 case 0:
                     break;
                 case 1:
+                    key_detection[key].stateMachine = 2;
                     break;
                 case 2:
                     break;
@@ -110,7 +118,7 @@ ISR(TIMER0_COMPA_vect){
                     break;
                 }
             else                // key's y == 0
-                switch(key_detection[i].stateMachine){
+                switch(key_detection[key].stateMachine){
                 case 0:
                     break;
                 case 1:
@@ -118,8 +126,10 @@ ISR(TIMER0_COMPA_vect){
                 case 2:
                     break;
                 case 3:
+                    key_detection[key].stateMachine = 5;
                     break;
                 case 4:
+                    key_detection[key].stateMachine = 6;
                     break;
                 case 5:
                     break;
@@ -135,8 +145,38 @@ ISR(TIMER0_COMPA_vect){
 
 // asynchronous main loop
 void loop(){
-    lag(10);
+    uint8_t i = 0;
 
+    // key state machine to serial routine
+    for(i = 0; i < (MAXKEYS / 2); i++)
+        switch(key_detection[i].stateMachine){
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2: // key is on
+            serial_write_number(i, 2, 0);
+            serial_write_string(" ON = ", 0);
+            serial_write_number(key_detection[i].counter, 3, 1);
+            key_detection[i].stateMachine = 3;
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        case 6: // key is off
+            serial_write_number(i, 2, 0);
+            serial_write_string(" OFF ", 1);
+            key_detection[i].stateMachine = 0;
+            key_detection[i].counter = 0;
+            break;
+        default:
+            break;
+        }
+
+    lag(5);
 }
 
 // main function
