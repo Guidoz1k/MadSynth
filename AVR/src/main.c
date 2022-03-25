@@ -176,7 +176,7 @@ void loop(){
             break;
         }
 
-/*
+
     lcd_write_string("UI BUTTONS: ", 0, 1);
     switch(inputs_read()){
     case 0:
@@ -186,34 +186,27 @@ void loop(){
         lcd_write_string("Encoder", 0, 13);
         break;
     case 2:
-        lcd_write_string("UP", 0, 13);
+        lcd_write_string("UP     ", 0, 13);
         break;
     case 3:
-        lcd_write_string("DOWN", 0, 13);
+        lcd_write_string("DOWN   ", 0, 13);
         break;
     case 4:
-        lcd_write_string("LEFT", 0, 13);
+        lcd_write_string("RIGHT  ", 0, 13);
         break;
     case 5:
-        lcd_write_string("RIGHT", 0, 13);
+        lcd_write_string("LEFT   ", 0, 13);
         break;
     default:
         break;
     }
-    lcd_write_string("ROTATION: ", 0, 24);
-    lcd_write_number(inputs_rotation(), 3, 0, 34);
-*/
-    serial_write_number(inputs_read(), 1, 0);
-    serial_write_string(" - ", 0);
-    serial_write_number(inputs_rotation(), 5, 0);
-    serial_write_string(" - ", 0);
-    for(i = 0; i <= 6; i++){
-        serial_write_number(adc_read(i), 4, 0);
-        serial_write_string(" - ", 0);
-    }
-    serial_write_string(" ", 1);
 
-    lag(250);
+    lcd_write_string("ROTATION: ", 0, 25);
+    lcd_write_number(inputs_rotation(), 5, 0, 35);
+    for(i = 0; i <= 6; i++)
+        lcd_write_number(adc_read(i), 3, 1, 6 * i);
+
+    lag(50);
 }
 
 // main function
