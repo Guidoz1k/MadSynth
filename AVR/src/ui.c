@@ -53,23 +53,23 @@ uint8_t inputs_read(void){
     uint8_t input = 0;
     uint8_t counter = 0;
 
-    if((!PINB) & (0b00000100 << 0)){
+    if(!(PINB & (0b00000100 << 0))){
         input = 1;
         counter++;
     }
-    if((!PINB) & (0b00000100 << 1)){
+    if(!(PINB & (0b00000100 << 1))){
         input = 2;
         counter++;
     }
-    if((!PINB) & (0b00000100 << 2)){
+    if(!(PINB & (0b00000100 << 2))){
         input = 3;
         counter++;
     }
-    if((!PINB) & (0b00000100 << 3)){
+    if(!(PINB & (0b00000100 << 3))){
         input = 4;
         counter++;
     }
-    if((!PINB) & (0b00000100 << 4)){
+    if(!(PINB & (0b00000100 << 4))){
         input = 5;
         counter++;
     }

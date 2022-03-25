@@ -7,7 +7,7 @@
     PORTD: 5 pins (0,1,2,3,7)
     PORTE: 3 pins (U,U,3,4,5) --> U = UART0 + LCD control pins
     PORTF: 8 analog pins -------> analog inputs
-    PORTG: 4 pins (0,1,2,5)-
+    PORTG: 4 pins (0,1,2,5)
     PORTH: 6 pins (0,1,3,4,5,6)
     PORTI: Does not exist
     PORTJ: 2 pins (0,1)
@@ -77,7 +77,7 @@ ISR(TIMER0_COMPA_vect){
                 case 0:
                     break;
                 case 1:
-                    key_detection[i].stateMachine = 6;
+                    // key_detection[i].stateMachine = 6; IS THIS GOOD ACTUALLY?
                     break;
                 case 2:
                     break;
@@ -176,7 +176,44 @@ void loop(){
             break;
         }
 
-    lag(5);
+/*
+    lcd_write_string("UI BUTTONS: ", 0, 1);
+    switch(inputs_read()){
+    case 0:
+        lcd_write_string("INVALID", 0, 13);
+        break;
+    case 1:
+        lcd_write_string("Encoder", 0, 13);
+        break;
+    case 2:
+        lcd_write_string("UP", 0, 13);
+        break;
+    case 3:
+        lcd_write_string("DOWN", 0, 13);
+        break;
+    case 4:
+        lcd_write_string("LEFT", 0, 13);
+        break;
+    case 5:
+        lcd_write_string("RIGHT", 0, 13);
+        break;
+    default:
+        break;
+    }
+    lcd_write_string("ROTATION: ", 0, 24);
+    lcd_write_number(inputs_rotation(), 3, 0, 34);
+*/
+    serial_write_number(inputs_read(), 1, 0);
+    serial_write_string(" - ", 0);
+    serial_write_number(inputs_rotation(), 5, 0);
+    serial_write_string(" - ", 0);
+    for(i = 0; i <= 6; i++){
+        serial_write_number(adc_read(i), 4, 0);
+        serial_write_string(" - ", 0);
+    }
+    serial_write_string(" ", 1);
+
+    lag(250);
 }
 
 // main function
