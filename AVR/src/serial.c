@@ -5,6 +5,8 @@
         1   TX pin
 */
 
+static const uint8_t MAXSIZE = 20; // max size of serial 0 message
+
 // initialize the serial peripheral
 void serial_init(void){
 	UBRR0H = 0x00;
@@ -37,6 +39,7 @@ static void serial_transmit(uint8_t character){
 	serialWrite(character);
 }
 
+// prints to serial 0 a string
 void serial_write_string(const char *pointer, uint8_t newline){
 	uint8_t counter = 0;
 
@@ -47,6 +50,7 @@ void serial_write_string(const char *pointer, uint8_t newline){
 		serial_transmit('\n');
 }
 
+// prints to serial a integer
 void serial_write_number(uint16_t number, uint8_t size, uint8_t newline){
 	char character = 0;
 	uint32_t ten = 0;

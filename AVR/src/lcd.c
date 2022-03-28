@@ -150,6 +150,7 @@ void display_init(){
 	lcd_pos(0, 0);
 }
 
+// print string in the LCD into specific position
 void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos){
 	uint8_t sector = 0;
 	uint8_t counter = 0;
@@ -163,6 +164,7 @@ void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos){
 	}
 }
 
+// print unsigned number in the LCD into specific position
 void lcd_write_number(uint16_t number, uint8_t size, uint8_t line, uint8_t pos){
 	uint8_t sector = 0;
 	char character = 0;
@@ -188,3 +190,13 @@ void lcd_write_number(uint16_t number, uint8_t size, uint8_t line, uint8_t pos){
 
 }
 
+// prints character in the LCD into specific position
+void lcd_write_char(const char pointer, uint8_t line, uint8_t pos){
+	uint8_t sector = 0;
+
+	if(line > 1)
+		sector = 1;
+	lcd_pos(line, pos);
+
+	lcd_write(pointer, sector);
+}

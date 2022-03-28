@@ -1,6 +1,5 @@
 #include "anal.h"
 /*
-    AREF: DOES IT NEED ANY CONNECTION?
     PORTF:
         0   bend wheel
         1   bend mod
@@ -12,8 +11,12 @@
 
 */
 
-static uint16_t old_values[7];
+static const uint8_t FILTER = 20;       // amount of times an analog value is averaged out
+static const uint8_t HISTERESIS = 1;    // minimum difference between a signal's value over time to trigger histeresis
 
+static uint16_t old_values[7] = {0};  // previous analog readings for histeresis algorithm
+
+// executes one read on an analog pin
 static uint16_t adc_return(uint8_t pin){
     uint16_t result = 0;
 
@@ -28,18 +31,14 @@ static uint16_t adc_return(uint8_t pin){
 }
 
 void adc_init(void){
-    uint8_t i = 0;
-
-    for(i = 0; i <= 6; i++)
-        old_values[i] = 0;
-
     ADMUX = 0b01000000;     // voltage reference
     ADCSRA = 0b10000100;    // turns ADC on with 16 prescaler
     DDRF = 0;               // all pins are inputs
     DIDR0 = 0xFF;           // turns digital input off
-    adc_return(0);            // performs first conversion to initialize the ADC
+    adc_return(0);          // performs first conversion to initialize the ADC
 }
 
+// read an analog pin, filter it and then runs it through an histeresis window
 uint8_t adc_read(uint8_t pin){
     uint8_t i = 0;
     uint32_t total = 0;

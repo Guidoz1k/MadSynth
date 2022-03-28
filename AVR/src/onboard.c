@@ -1,5 +1,8 @@
 #include "onboard.h"
 /*
+    library used only for debugging
+    all functions manipulate the onboard LED's state
+
     PORTB 7 --> onboard LED
 */
 

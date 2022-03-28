@@ -19,6 +19,7 @@ ISR(PCINT0_vect){
     uint8_t new_a = 0;
     uint8_t new_b = 0;
 
+    // updates the pins states
     if(PINB & 0b00000001)
         new_a = 1;
     if(PINB & 0b00000010)
@@ -41,6 +42,7 @@ ISR(PCINT0_vect){
         }
 }
 
+// reads all UI inputs excluding the encoder rotation pins
 uint8_t inputs_read(void){
 /*  input   button
     1       encoder
@@ -74,19 +76,23 @@ uint8_t inputs_read(void){
         counter++;
     }
 
+    // it's invalid to press more than one button at a time
     if(counter > 1)
         input = 0;
 
     return input;
 }
 
+// return the accumulated rotation count
 int8_t inputs_rotation(void){
     int8_t old_r = rotation;
 
+    // returns the encoder rotation count and resets it
     rotation = 0;
     return old_r;
 }
 
+// initializes pins and variables
 void ui_init(void){
     DDRB = 0;  // every pin is an input
 

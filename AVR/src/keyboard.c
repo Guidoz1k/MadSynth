@@ -16,6 +16,7 @@ void keyboard_init(void){
     PORTA = 0;
 }
 
+// sets the output to select the right mux channel
 void keyboard_write(uint8_t position){
     // PORTA = column number | (Row number << 3); for more information check the "1 - keyboard layout.xlsx"
     switch(position){
@@ -411,6 +412,7 @@ void keyboard_write(uint8_t position){
     __asm__("nop\n\t"); // delay for reading
 }
 
+// reads the output of the mux
 uint8_t keyboard_read(void){
     uint8_t output = 0;
 

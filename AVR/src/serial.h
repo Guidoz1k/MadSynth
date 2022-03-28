@@ -4,8 +4,6 @@
 #include <Arduino.h>
 #include "stdint.h"
 
-#define MAXSIZE 20
-
 void serial_init(void);
 
 void serial_write_string(const char *pointer, uint8_t newline);
