@@ -4,8 +4,10 @@
 #include <Arduino.h>
 #include "stdint.h"
 
+#define HEADBYTE    0xff
+
 void serial1_init(void);
 
-static void serial1_transmit(uint8_t character);
+void serial1_transmit(uint8_t byte0, uint8_t byte1);
 
 #endif /* __SERIAL1_H */

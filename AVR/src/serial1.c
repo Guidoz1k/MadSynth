@@ -1,35 +1,40 @@
-#include "serial0.h"
+#include "serial1.h"
 /*
     PORTD:
         2   RX pin
         3   TX pin
 */
 /*
-0 ... 61	-->	keys pressed	--> 0 = off, 1 - 256 = intensity
+1 ... 61	-->	keys pressed	--> 0 = off, 1 - 256 = intensity
 
 110 --> volume			--> 0 ... 99?
 111	--> stereo mode		--> L+R, L, R
 112	--> osc count limit	--> 0 ... MAXOSC
 113	--> max osc mode	--> #MISSING#
 114	--> octave + trans	--> 0 ... 110 keys
-115	--> ADRS A time		--> \
-116	--> ADRS D time		--> |
-117	--> ADRS S time		--> > ADSR #SHOULD THIS BE 16 BITS?
-118	--> ADRS S level 	--> |
-119	--> ADRS A time		--> /
+115	--> ADRS A time	0	-->	first byte
+116	--> ADRS A time	1	--> second byte when necessary
+117	--> ADRS D time	0	-->	first byte
+118	--> ADRS D time	1	--> second byte when necessary
+119	--> ADRS S time	0	-->	first byte
+120	--> ADRS S time	1	--> second byte when necessary
+121	--> ADRS S level 0	-->	first byte
+122	--> ADRS S level 1	--> second byte when necessary
+123	--> ADRS A time	0	-->	first byte
+124	--> ADRS A time	1	--> second byte when necessary
 
-120	-->	OSC1 shape
-121	-->	OSC1 # sub-osc
-122	-->	OSC1 sub-osc mode
-123	-->	OSC1 sub-osc unison
-124	-->	OSC1 transpose
-125	-->	OSC1 cent
-130	-->	OSC2 shape
-131	-->	OSC2 # sub-osc
-132	-->	OSC2 sub-osc mode
-133	-->	OSC2 sub-osc unison
-134	-->	OSC2 transpose
-135	-->	OSC2 cent
+130	-->	OSC1 shape
+131	-->	OSC1 # sub-osc
+132	-->	OSC1 sub-osc mode
+133	-->	OSC1 sub-osc unison
+134	-->	OSC1 transpose
+135	-->	OSC1 cent
+140	-->	OSC2 shape
+141	-->	OSC2 # sub-osc
+142	-->	OSC2 sub-osc mode
+143	-->	OSC2 sub-osc unison
+144	-->	OSC2 transpose
+145	-->	OSC2 cent
 
 ######################################################TBD
 	controls
@@ -64,9 +69,14 @@ static void serial1Write(byte data){
 	}
 
 // blocking function that sends one character over ESP UART
-void serial1_transmit(uint8_t character){
+static void serial1_send(uint8_t character){
 	while(!serial1WriteAvailable());
 	serial1Write(character);
 }
 
+void serial1_transmit(uint8_t byte0, uint8_t byte1){
+	serial1_send(HEADBYTE);
+	serial1_send(byte0);
+	serial1_send(byte1);
+}
 
