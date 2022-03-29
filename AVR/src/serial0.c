@@ -1,4 +1,4 @@
-#include "serial.h"
+#include "serial0.h"
 /*
     PORTE:
         0   RX pin
@@ -8,18 +8,12 @@
 static const uint8_t MAXSIZE = 20; // max size of serial 0 message
 
 // initialize the serial peripheral
-void serial_init(void){
+void serial0_init(void){
 	UBRR0H = 0x00;
 	UBRR0L = 0x10;		// baud rate of 115200 equals to UBRR = 16
 	UCSR0A = 0x02;		// U2Xn = 1 so the baud rate is B = (f_osc / (UBRR + 1)) / 8
 	UCSR0B = 0x18;		// enables RX and TX
 	UCSR0C = 0x06;		// set frame format: 8data
-
-	UBRR1H = 0x00;
-	UBRR1L = 0x10;		// baud rate of 115200 equals to UBRR = 16
-	UCSR1A = 0x02;		// U2Xn = 1 so the baud rate is B = (f_osc / (UBRR + 1)) / 8
-	UCSR1B = 0x18;		// enables RX and TX
-	UCSR1C = 0x06;		// set frame format: 8data
 }
 
 // test if USB serial is ready to transmit
@@ -32,36 +26,15 @@ static uint8_t serial0WriteAvailable(){
 	return data;
 }
 
-// test if ESP serial is ready to transmit
-static uint8_t serial1WriteAvailable(){
-	uint8_t data = 0;	// return flag value
-
-	if(UCSR1A & 0x20)	// USART data register empty (UDRE0) is 1
-	data = 1;
-
-	return data;
-}
-
 // USB serial transmit
 static void serial0Write(byte data){
 	UDR0 = data;
-	}
-
-// ESP serial transmit
-static void serial1Write(byte data){
-	UDR1 = data;
 	}
 
 // blocking function that sends one character over USB UART
 static void serial0_transmit(uint8_t character){
 	while(!serial0WriteAvailable());
 	serial0Write(character);
-}
-
-// blocking function that sends one character over ESP UART
-static void serial1_transmit(uint8_t character){
-	while(!serial1WriteAvailable());
-	serial1Write(character);
 }
 
 // prints to serial 0 a string

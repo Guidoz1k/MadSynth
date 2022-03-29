@@ -4,7 +4,7 @@
     PORTA: 8 pins --------------> Keyboard
     PORTB: 8 pins --------------> UI buttons
     PORTC: 8 pins --------------> LCD data pins
-    PORTD: 5 pins (0,1,2,3,7)
+    PORTD: 5 pins (0,1,2,3,7) --> pins 2 + 3 are UART1
     PORTE: 3 pins (U,U,3,4,5) --> U = UART0 + LCD control pins
     PORTF: 8 analog pins -------> analog inputs
     PORTG: 4 pins (0,1,2,5)
@@ -56,6 +56,9 @@ void lag(uint16_t time){
 
 // 1ms interrupt function
 ISR(TIMER0_COMPA_vect){
+    // 100 * interrupt time = 100ms is the maximum time between x - y signals
+    static const uint8_t MAXPRESS = 100;
+
     uint8_t i = 0;
     uint8_t key = 0;
 
@@ -73,6 +76,8 @@ ISR(TIMER0_COMPA_vect){
                     break;
                 case 1:
                     key_detection[i].counter++;
+                    if(key_detection[i].counter == MAXPRESS)
+                        key_detection[i].stateMachine = 7;
                     break;
                 case 2:
                     break;
@@ -84,6 +89,8 @@ ISR(TIMER0_COMPA_vect){
                     break;
                 case 6:
                     break;
+                case 7:
+                    break;
                 default:
                     break;
                 }
@@ -93,6 +100,7 @@ ISR(TIMER0_COMPA_vect){
                     break;
                 case 1:
                     // key_detection[i].stateMachine = 6; IS THIS GOOD ACTUALLY?
+                    // actually not using this implements a debounce (sort of)
                     break;
                 case 2:
                     break;
@@ -105,6 +113,10 @@ ISR(TIMER0_COMPA_vect){
                     key_detection[i].stateMachine = 6;
                     break;
                 case 6:
+                    break;
+                case 7:
+                    key_detection[i].counter = 0;
+                    key_detection[i].stateMachine = 0;
                     break;
                 default:
                     break;
@@ -129,6 +141,8 @@ ISR(TIMER0_COMPA_vect){
                     break;
                 case 6:
                     break;
+                case 7:
+                    break;
                 default:
                     break;
                 }
@@ -149,6 +163,8 @@ ISR(TIMER0_COMPA_vect){
                 case 5:
                     break;
                 case 6:
+                    break;
+                case 7:
                     break;
                 default:
                     break;
@@ -179,6 +195,7 @@ void loop(){
             serial0_write_number(i, 2, 0);
             serial0_write_string(" ON = ", 0);
             serial0_write_number(key_detection[i].counter, 3, 1);
+            serial1_transmit(i);
             key_detection[i].stateMachine = 3;
             break;
         case 3:
@@ -274,7 +291,7 @@ void loop(){
             break;
         }
         break;
-    case 3: // Triple Oscillator Mixer
+    case 3: // Stereo Oscillator Mixer
         lcd_write_string("03 Oscillators mixer     ~", 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
@@ -328,7 +345,7 @@ void loop(){
             break;
         case 3:
             lcd_write_string("  ", 0, 24);
-            menu_state = 52;
+            menu_state = 53;
             break;
         case 4:
             menu_state = 6;
@@ -340,30 +357,8 @@ void loop(){
             break;
         }
         break;
-    case 6: // Bass oscillator controls
-        lcd_write_string("06 Bass osc controls     ~", 0, 0);
-        lcd_write_char(127, 0, 24);
-        switch(button_pressed){
-        case 1:
-            break;
-        case 2:
-            break;
-        case 3:
-            lcd_write_string("  ", 0, 24);
-            menu_state = 58;
-            break;
-        case 4:
-            menu_state = 7;
-            break;
-        case 5:
-            menu_state = 5;
-            break;
-        default:
-            break;
-        }
-        break;
-    case 7: // ADSR-5 parameters
-        lcd_write_string("07 ADSR-5 parameters     ~", 0, 0);
+    case 6: // ADSR-5 parameters
+        lcd_write_string("06 ADSR-5 parameters     ~", 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -375,17 +370,17 @@ void loop(){
             menu_state = 26;
             break;
         case 4:
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 5:
-            menu_state = 6;
+            menu_state = 5;
             break;
         default:
             break;
         }
         break;
-    case 8: // Modifiers bend/mod/press
-        lcd_write_string("08 Control modifiers     ~", 0, 0);
+    case 7: // Modifiers bend/mod/press
+        lcd_write_string("07 Control modifiers     ~", 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -397,17 +392,17 @@ void loop(){
             menu_state = 32;
             break;
         case 4:
-            menu_state = 9;
+            menu_state = 8;
             break;
         case 5:
-            menu_state = 7;
+            menu_state = 6;
             break;
         default:
             break;
         }
         break;
-    case 9: // LFO controls
-        lcd_write_string("09 LFO controls          ~", 0, 0);
+    case 8: // LFO controls
+        lcd_write_string("08 LFO controls          ~", 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -419,17 +414,17 @@ void loop(){
             menu_state = 38;
             break;
         case 4:
-            menu_state = 10;
+            menu_state = 9;
             break;
         case 5:
-            menu_state = 8;
+            menu_state = 7;
             break;
         default:
             break;
         }
         break;
-    case 10: // Randomizer controls
-        lcd_write_string("10 Randomizer controls    ", 0, 0);
+    case 9: // Randomizer controls
+        lcd_write_string("09 Randomizer controls    ", 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -443,7 +438,7 @@ void loop(){
         case 4:
             break;
         case 5:
-            menu_state = 9;
+            menu_state = 8;
             break;
         default:
             break;
@@ -583,7 +578,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 7;
+            menu_state = 6;
             break;
         case 3:
             break;
@@ -604,7 +599,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 7;
+            menu_state = 6;
             break;
         case 3:
             break;
@@ -626,7 +621,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 7;
+            menu_state = 6;
             break;
         case 3:
             break;
@@ -648,7 +643,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 7;
+            menu_state = 6;
             break;
         case 3:
             break;
@@ -670,7 +665,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 7;
+            menu_state = 6;
             break;
         case 3:
             break;
@@ -692,7 +687,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 7;
+            menu_state = 6;
             break;
         case 3:
             break;
@@ -713,7 +708,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 3:
             break;
@@ -734,7 +729,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 3:
             break;
@@ -756,7 +751,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 3:
             break;
@@ -778,7 +773,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 3:
             break;
@@ -800,7 +795,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 3:
             break;
@@ -822,7 +817,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 8;
+            menu_state = 7;
             break;
         case 3:
             break;
@@ -843,7 +838,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 9;
+            menu_state = 8;
             break;
         case 3:
             break;
@@ -864,7 +859,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 9;
+            menu_state = 8;
             break;
         case 3:
             break;
@@ -885,7 +880,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 10;
+            menu_state = 9;
             break;
         case 3:
             break;
@@ -906,7 +901,7 @@ void loop(){
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 10;
+            menu_state = 9;
             break;
         case 3:
             break;
@@ -920,7 +915,7 @@ void loop(){
         }
         break;
 
-    case 42: // Triple Oscillator Mixer
+    case 42: // Stereo Oscillator Mixer
         lcd_write_string("00 Mixer Aconfig         ~", 2, 0);
         switch(button_pressed){
         case 1:
@@ -963,7 +958,7 @@ void loop(){
         }
         break;
     case 44: // Triple Oscillator Mixer
-        lcd_write_string("02 Oscillator 2          ~", 2, 0);
+        lcd_write_string("02 Oscillator 2           ", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -975,31 +970,9 @@ void loop(){
         case 3:
             break;
         case 4:
-            menu_state = 45;
             break;
         case 5:
             menu_state = 43;
-            break;
-        default:
-            break;
-        }
-        break;
-    case 45: // Triple Oscillator Mixer
-        lcd_write_string("03 Bass oscillator        ", 2, 0);
-        lcd_write_char(127, 2, 24);
-        switch(button_pressed){
-        case 1:
-            //break;
-        case 2:
-            lcd_write_string("                          ", 2, 0);
-            menu_state = 3;
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            menu_state = 44;
             break;
         default:
             break;
@@ -1093,7 +1066,7 @@ void loop(){
         }
         break;
     case 50: // Oscillator 1 controls
-        lcd_write_string("04 Transpose             ~", 2, 0);
+        lcd_write_string("04 Sub-osc unison        ~", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -1115,7 +1088,29 @@ void loop(){
         }
         break;
     case 51: // Oscillator 1 controls
-        lcd_write_string("05 Cent variation         ", 2, 0);
+        lcd_write_string("05 Transpose             ~", 2, 0);
+        lcd_write_char(127, 2, 24);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            lcd_write_string("                          ", 2, 0);
+            menu_state = 4;
+            break;
+        case 3:
+            break;
+        case 4:
+            menu_state = 52;
+            break;
+        case 5:
+            menu_state = 50;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 52: // Oscillator 1 controls
+        lcd_write_string("06 Cent variation         ", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -1129,36 +1124,15 @@ void loop(){
         case 4:
             break;
         case 5:
-            menu_state = 50;
+            menu_state = 51;
             break;
         default:
             break;
         }
         break;
 
-    case 52: // Oscillator 2 controls
-        lcd_write_string("00 Osc 2 Aconfig         ~", 2, 0);
-        switch(button_pressed){
-        case 1:
-            //break;
-        case 2:
-            lcd_write_string("                          ", 2, 0);
-            menu_state = 5;
-            break;
-        case 3:
-            break;
-        case 4:
-            menu_state = 53;
-            break;
-        case 5:
-            break;
-        default:
-            break;
-        }
-        break;
     case 53: // Oscillator 2 controls
-        lcd_write_string("01 Shape                 ~", 2, 0);
-        lcd_write_char(127, 2, 24);
+        lcd_write_string("00 Osc 2 Aconfig         ~", 2, 0);
         switch(button_pressed){
         case 1:
             //break;
@@ -1172,14 +1146,13 @@ void loop(){
             menu_state = 54;
             break;
         case 5:
-            menu_state = 52;
             break;
         default:
             break;
         }
         break;
     case 54: // Oscillator 2 controls
-        lcd_write_string("02 Sub-oscillators       ~", 2, 0);
+        lcd_write_string("01 Shape                 ~", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -1201,7 +1174,7 @@ void loop(){
         }
         break;
     case 55: // Oscillator 2 controls
-        lcd_write_string("03 Sub-oscillators mode  ~", 2, 0);
+        lcd_write_string("02 Sub-oscillators       ~", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -1223,7 +1196,7 @@ void loop(){
         }
         break;
     case 56: // Oscillator 2 controls
-        lcd_write_string("04 Transpose             ~", 2, 0);
+        lcd_write_string("03 Sub-oscillators mode  ~", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -1245,7 +1218,29 @@ void loop(){
         }
         break;
     case 57: // Oscillator 2 controls
-        lcd_write_string("05 Cent variation         ", 2, 0);
+        lcd_write_string("04 Sub-osc unison        ~", 2, 0);
+        lcd_write_char(127, 2, 24);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            lcd_write_string("                          ", 2, 0);
+            menu_state = 5;
+            break;
+        case 3:
+            break;
+        case 4:
+            menu_state = 58;
+            break;
+        case 5:
+            menu_state = 56;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 58: // Oscillator 2 controls
+        lcd_write_string("05 Transpose             ~", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
@@ -1257,49 +1252,28 @@ void loop(){
         case 3:
             break;
         case 4:
-            break;
-        case 5:
-            menu_state = 56;
-            break;
-        default:
-            break;
-        }
-        break;
-
-    case 58: // Bass oscillator controls
-        lcd_write_string("00 Bass osc Aconfig      ~", 2, 0);
-        switch(button_pressed){
-        case 1:
-            //break;
-        case 2:
-            lcd_write_string("                          ", 2, 0);
-            menu_state = 6;
-            break;
-        case 3:
-            break;
-        case 4:
             menu_state = 59;
             break;
         case 5:
+            menu_state = 57;
             break;
         default:
             break;
         }
         break;
-    case 59: // Bass oscillator controls
-        lcd_write_string("01 Shape                 ~", 2, 0);
+    case 59: // Oscillator 1 controls
+        lcd_write_string("06 Cent variation         ", 2, 0);
         lcd_write_char(127, 2, 24);
         switch(button_pressed){
         case 1:
             //break;
         case 2:
             lcd_write_string("                          ", 2, 0);
-            menu_state = 6;
+            menu_state = 4;
             break;
         case 3:
             break;
         case 4:
-            menu_state = 60;
             break;
         case 5:
             menu_state = 58;
@@ -1308,49 +1282,7 @@ void loop(){
             break;
         }
         break;
-    case 60: // Bass oscillator controls
-        lcd_write_string("02 Transpose             ~", 2, 0);
-        lcd_write_char(127, 2, 24);
-        switch(button_pressed){
-        case 1:
-            //break;
-        case 2:
-            lcd_write_string("                          ", 2, 0);
-            menu_state = 6;
-            break;
-        case 3:
-            break;
-        case 4:
-            menu_state = 61;
-            break;
-        case 5:
-            menu_state = 59;
-            break;
-        default:
-            break;
-        }
-        break;
-    case 61: // Bass oscillator controls
-        lcd_write_string("03 Cent variation         ", 2, 0);
-        lcd_write_char(127, 2, 24);
-        switch(button_pressed){
-        case 1:
-            //break;
-        case 2:
-            lcd_write_string("                          ", 2, 0);
-            menu_state = 6;
-            break;
-        case 3:
-            break;
-        case 4:
-            break;
-        case 5:
-            menu_state = 60;
-            break;
-        default:
-            break;
-        }
-        break;
+
     default:
         break;
     }
@@ -1370,7 +1302,8 @@ int main(){
 
     display_init();     // initialize the display pins and functions
     onboard_init();     // initialize the onboard components pins and functions
-    serial_init();      // initialize the serial pins and functions
+    serial0_init();     // initialize the serial pins and functions
+    serial1_init();     // initialize the serial pins and functions
     keyboard_init();    // initialize the keyboard pins and functions
     ui_init();          // initialize the UI buttons and encoder pins and functions
     adc_init();         // initialize the ADC pins and functions
