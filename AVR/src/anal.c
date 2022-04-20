@@ -12,9 +12,9 @@
 */
 
 static const uint8_t FILTER = 20;       // amount of times an analog value is averaged out
-static const uint8_t HISTERESIS = 1;    // minimum difference between a signal's value over time to trigger histeresis
+static const uint8_t HYSTERESIS = 1;    // minimum difference between a signal's value over time to trigger hysteresis
 
-static uint16_t old_values[7] = {0};  // previous analog readings for histeresis algorithm
+static uint16_t old_values[7] = {0};  // previous analog readings for hysteresis algorithm
 
 // executes one read on an analog pin
 static uint16_t adc_return(uint8_t pin){
@@ -38,7 +38,7 @@ void adc_init(void){
     adc_return(0);          // performs first conversion to initialize the ADC
 }
 
-// read an analog pin, filter it and then runs it through an histeresis window
+// read an analog pin, filter it and then runs it through an hysteresis window
 uint8_t adc_read(uint8_t pin){
     uint8_t i = 0;
     uint32_t total = 0;
@@ -47,13 +47,13 @@ uint8_t adc_read(uint8_t pin){
         total += adc_return(pin);
     total /= FILTER;
 
-    // 10-bit histeresis
-    if((total < (old_values[pin] - HISTERESIS)) || (total > (old_values[pin] + HISTERESIS)))
+    // 10-bit hysteresis
+    if((total < (old_values[pin] - HYSTERESIS)) || (total > (old_values[pin] + HYSTERESIS)))
         old_values[pin] = (uint16_t)total;
     else
         total = old_values[pin];
 
-    total >>= 2; // convert filtered and post-histeresis values to 8 bits
+    total >>= 2; // convert filtered and post-hysteresis values to 8 bits
     return (uint8_t)total;
 }
 

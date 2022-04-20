@@ -15,7 +15,7 @@ The project was designed as follows:
 
 First version          | Second version          | Third version           | Fourth version          | Fifth version
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
-[DUE] Simple based signal gen    | [ESP32] Deep Note project     |        [ESP32]                 | [STM32H743] Used in the MES course | [AVR/ESP ] MadSynth's final version
+[DUE] Sample based signal gen    | [ESP32] Deep Note project     |        [ESP32]                 | [STM32H743] Used in the MES course | [AVR/ESP ] MadSynth's final version
 ![](https://i.imgur.com/TdHkZdt.png) | ![](https://i.imgur.com/2VIc12S.png) | ![](https://i.imgur.com/aatGlXY.png) | ![](https://i.imgur.com/bMaZ94R.png) | ![](https://i.imgur.com/RAk690x.png)
 
 
