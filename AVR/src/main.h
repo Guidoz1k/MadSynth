@@ -12,5 +12,10 @@
 #include "anal.h"
 
 #define MAXKEYS     122 // maximum number of keys in the keybed
+#define DIGIT_POS   15  // position for numerical inputs
+#define MAXVOICES   61  // maximum number of audio channels
+#define MAXSVOICES  15  // maximum number of audio channels per oscillator
+#define MAXTRANS    48  // maximum number of notes a osc can be transposed
+#define MAXADSR     250 // maximum amount of ms a parameter of ADSR can have
 
 #endif /* __MAIN_H */

@@ -25,6 +25,7 @@ ISR(PCINT0_vect){
     if(PINB & 0b00000010)
         new_b = 1;
 
+/* the original code counted half-steps
     if(new_a != pin_a){     // pin a switched
         if(new_a != pin_b)  // pins are at diff states
             rotation++;
@@ -39,6 +40,19 @@ ISR(PCINT0_vect){
             else
                 rotation++;
             pin_b = new_b;
+*/
+    // this code only takes full-steps into account
+    if(new_a != pin_a){     // pin a switched
+        if(new_a == pin_b)  // pins are at diff states
+            rotation--;
+        pin_a = new_a;
+    }
+    else
+        if(new_b != pin_b){     // pin b switched
+            if(new_b == pin_a)  // pins are at diff states
+                rotation++;
+            pin_b = new_b;
+
         }
 }
 

@@ -11,26 +11,27 @@
 111	--> stereo mode		--> L+R, L, R
 112	--> osc count limit	--> 0 ... MAXOSC
 113	--> max osc mode	--> 0 or 1
-114	--> octave + trans	--> 0 ... 110 keys
-115 --> mixer channel 1 --> 0 ... 99?
+114	--> octave			--> 0 ... 8 octaves to the right
+115	--> octave + trans	--> 0 ... 12 keys in a octave
 116 --> mixer channel 1 --> 0 ... 99?
+117 --> mixer channel 1 --> 0 ... 99?
 
 120	-->	OSC1 shape
 121	-->	OSC1 # sub-osc
-122	-->	OSC1 sub-osc mode
-123	-->	OSC1 sub-osc unison
+122	-->	OSC1 sub-osc mode   X
+123	-->	OSC1 sub-osc unison X
 124	-->	OSC1 transpose
 125	-->	OSC1 cent
 126 --> OSC1 trans_mod
 127 --> OSC1 cent_mod
 130	-->	OSC2 shape
 131	-->	OSC2 # sub-osc
-132	-->	OSC2 sub-osc mode
-133	-->	OSC2 sub-osc unison
+132	-->	OSC2 sub-osc mode   X
+133	-->	OSC2 sub-osc unison X
 134	-->	OSC2 transpose
 135	-->	OSC2 cent
 136	-->	OSC2 trans_mod
-135	-->	OSC2 cent_mod
+137	-->	OSC2 cent_mod
 
 140	--> ADSR A time	0	-->	first byte
 141	--> ADSR A time	1	--> second byte when necessary
@@ -75,6 +76,7 @@
 190 --> noiser state
 191 --> noiser amp
 
+199 --> MOD ENV state
 200	--> MOD ENV A time	0	-->	first byte
 201	--> MOD ENV A time	1	--> second byte when necessary
 202	--> MOD ENV D time	0	-->	first byte

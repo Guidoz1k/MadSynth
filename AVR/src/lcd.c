@@ -151,7 +151,7 @@ void display_init(){
 }
 
 // print string in the LCD into specific position
-void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos){
+void lcd_write_string(const char *pointer, uint8_t size, uint8_t line, uint8_t pos){
 	uint8_t sector = 0;
 	uint8_t counter = 0;
 
@@ -159,7 +159,7 @@ void lcd_write_string(const char *pointer, uint8_t line, uint8_t pos){
 		sector = 1;
 	lcd_pos(line, pos);
 
-	while((counter++ < (40 - pos)) && (*pointer != '\0')){
+	while((counter++ < size) && (*pointer != '\0')){
 		lcd_write(*(pointer++), sector);
 	}
 }
