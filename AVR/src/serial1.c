@@ -10,36 +10,88 @@
 110 --> volume			--> 0 ... 99?
 111	--> stereo mode		--> L+R, L, R
 112	--> osc count limit	--> 0 ... MAXOSC
-113	--> max osc mode	--> #MISSING#
+113	--> max osc mode	--> 0 or 1
 114	--> octave + trans	--> 0 ... 110 keys
-115	--> ADRS A time	0	-->	first byte
-116	--> ADRS A time	1	--> second byte when necessary
-117	--> ADRS D time	0	-->	first byte
-118	--> ADRS D time	1	--> second byte when necessary
-119	--> ADRS S time	0	-->	first byte
-120	--> ADRS S time	1	--> second byte when necessary
-121	--> ADRS S level 0	-->	first byte
-122	--> ADRS S level 1	--> second byte when necessary
-123	--> ADRS A time	0	-->	first byte
-124	--> ADRS A time	1	--> second byte when necessary
+115 --> mixer channel 1 --> 0 ... 99?
+116 --> mixer channel 1 --> 0 ... 99?
 
-130	-->	OSC1 shape
-131	-->	OSC1 # sub-osc
-132	-->	OSC1 sub-osc mode
-133	-->	OSC1 sub-osc unison
-134	-->	OSC1 transpose
-135	-->	OSC1 cent
-140	-->	OSC2 shape
-141	-->	OSC2 # sub-osc
-142	-->	OSC2 sub-osc mode
-143	-->	OSC2 sub-osc unison
-144	-->	OSC2 transpose
-145	-->	OSC2 cent
+120	-->	OSC1 shape
+121	-->	OSC1 # sub-osc
+122	-->	OSC1 sub-osc mode
+123	-->	OSC1 sub-osc unison
+124	-->	OSC1 transpose
+125	-->	OSC1 cent
+126 --> OSC1 trans_mod
+127 --> OSC1 cent_mod
+130	-->	OSC2 shape
+131	-->	OSC2 # sub-osc
+132	-->	OSC2 sub-osc mode
+133	-->	OSC2 sub-osc unison
+134	-->	OSC2 transpose
+135	-->	OSC2 cent
+136	-->	OSC2 trans_mod
+135	-->	OSC2 cent_mod
+
+140	--> ADSR A time	0	-->	first byte
+141	--> ADSR A time	1	--> second byte when necessary
+142	--> ADSR D time	0	-->	first byte
+143	--> ADSR D time	1	--> second byte when necessary
+144	--> ADSR S time	0	-->	first byte
+145	--> ADSR S time	1	--> second byte when necessary
+146	--> ADSR S level 0	-->	first byte
+147	--> ADSR S level 1	--> second byte when necessary
+148	--> ADSR R time	0	-->	first byte
+149	--> ADSR R time	1	--> second byte when necessary
+150	--> ADSR A_mod
+151	--> ADSR D_mod
+152	--> ADSR S time_mod
+153	--> ADSR S_mod
+154	--> ADSR R_mod
+
+160 --> LFO1 state
+161 --> LFO1 mode
+162 --> LFO1 shape
+163 --> LFO1 amp
+164 --> LFO1 freq
+165 --> LFO1 amp_mod
+166 --> LFO1 freq_mod
+170 --> LFO2 state
+171 --> LFO2 mode
+172 --> LFO2 shape
+173 --> LFO2 amp
+174 --> LFO2 freq
+175 --> LFO2 amp_mod
+176 --> LFO2 freq_mod
+
+// manual controls' values
+180 --> pitch wheel
+181 --> mod wheel
+182 --> slider 1
+183 --> slider 2
+184 --> slider 3
+185 --> slider 4
+186 --> slider 5
+
+190 --> noiser state
+191 --> noiser amp
+
+200	--> MOD ENV A time	0	-->	first byte
+201	--> MOD ENV A time	1	--> second byte when necessary
+202	--> MOD ENV D time	0	-->	first byte
+203	--> MOD ENV D time	1	--> second byte when necessary
+204	--> MOD ENV S time	0	-->	first byte
+205	--> MOD ENV S time	1	--> second byte when necessary
+206	--> MOD ENV S level 0	-->	first byte
+207	--> MOD ENV S level 1	--> second byte when necessary
+208	--> MOD ENV R time	0	-->	first byte
+209	--> MOD ENV R time	1	--> second byte when necessary
+210	--> MOD ENV A_mod
+211	--> MOD ENV D_mod
+212	--> MOD ENV S time_mod
+213	--> MOD ENV S_mod
+214	--> MOD ENV R_mod
 
 ######################################################TBD
-	controls
-	LFO
-	randomizer (noiser)
 	mod envelope
 	ALL POST-FX
 */
@@ -75,7 +127,7 @@ static void serial1_send(uint8_t character){
 }
 
 void serial1_transmit(uint8_t byte0, uint8_t byte1){
-	serial1_send(HEADBYTE);
+	//serial1_send(HEADBYTE);
 	serial1_send(byte0);
 	serial1_send(byte1);
 }

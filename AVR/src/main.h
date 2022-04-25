@@ -12,6 +12,5 @@
 #include "anal.h"
 
 #define MAXKEYS     122 // maximum number of keys in the keybed
-#define MENUSIZE    25  // maximum number of character in a menu title
 
 #endif /* __MAIN_H */
