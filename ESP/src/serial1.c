@@ -22,3 +22,11 @@ int8_t serial1_read(uint8_t* buffer, uint8_t bytes){
 
     return bytes_read;
 }
+
+uint8_t serial1_check(void){
+    uint8_t buffer_size = 0;
+
+    uart_get_buffered_data_len(UART_NUM_2, (size_t *)&buffer_size);
+
+    return buffer_size;
+}

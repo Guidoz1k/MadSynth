@@ -54,6 +54,25 @@ uint8_t adc_read(uint8_t pin){
         total = old_values[pin];
 
     total >>= 2; // convert filtered and post-hysteresis values to 8 bits
+
+    // special mapping for adc_0 and adc_1
+    if(pin == 0){
+        if(total <= PW_MIN)
+            total = PW_MIN;
+        if(total >= PW_MAX)
+            total = PW_MAX;
+        total -= PW_MIN;
+        total *= 255;
+        total /= PW_MAX - PW_MIN;
+    }
+    if(pin == 1){
+        if(total >= MW_MAX)
+            total = 255;
+        if(total <= MW_MIN)
+            total = 0;
+        total = 255 - total;
+    }
+
     return (uint8_t)total;
 }
 

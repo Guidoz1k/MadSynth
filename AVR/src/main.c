@@ -436,7 +436,7 @@ void loop(){
         off_t = 0,
         on_t = 1
     } STATE;
-    static int8_t volume = 50;  // 0 ... 99
+    static uint8_t volume = 50;  // 0 ... 99
     static enum _stereo{
         l_r,
         l_only,
@@ -459,8 +459,8 @@ void loop(){
     static uint8_t osc1_osc_count = 0; // 0 ... 5(?)
     //static SO_MODE osc1_osc_mode = harmonic;              all sub oscillators are harmonic
     //static uint8_t osc1_osc_unison = 0; // 0 ... 100
-    static int8_t osc1_trans = 0;  // transpose -24 ... 24
-    static int8_t osc1_cent = 0;   // 0 ... 100
+    static uint8_t osc1_trans = 0;  // transpose -24 ... 24
+    static uint8_t osc1_cent = 0;   // 0 ... 100
     static MODIFIER osc1_trans_mod = none; // modifier for osc trans
     static MODIFIER osc1_cent_mod = none;  // modifier for osc cent
 
@@ -468,8 +468,8 @@ void loop(){
     static uint8_t osc2_osc_count = 0; // 0 ... 5(?)
     //static SO_MODE osc2_osc_mode = harmonic;              all sub oscillators are harmonic
     //static uint8_t osc2_osc_unison = 0; // 0 ... 100
-    static int8_t osc2_trans = 0;  // transpose -24 ... 24
-    static int8_t osc2_cent = 0;   // 0 ... 100
+    static uint8_t osc2_trans = 0;  // transpose -24 ... 24
+    static uint8_t osc2_cent = 0;   // 0 ... 100
     static MODIFIER osc2_trans_mod = none; // modifier for osc trans
     static MODIFIER osc2_cent_mod = none;  // modifier for osc cent
 
@@ -873,6 +873,7 @@ void loop(){
             menu_state = 180;
             break;
         case 4:
+            menu_state = 28;
             break;
         case 5:
             menu_state = 10;
@@ -881,7 +882,53 @@ void loop(){
             break;
         }
         break;
+    case 28: // INPUT DEBUG MODE
+        lcd_write_string("XX INPUT DEBUG MODE       ", 26, 0, 0);
+        //lcd_write_char(127, 0, 24);
+        control_update();
+        switch(button_pressed){
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            menu_state = 29;
+            break;
+        case 4:
+            break;
+        case 5:
+            menu_state = 11;
+            break;
+        default:
+            break;
+        }
+        break;
     }
+
+    case 29:
+        lcd_write_number(adc_read(0), 3, 3, 8);
+        lcd_write_number(adc_read(1), 3, 3, 16);
+        lcd_write_number(adc_read(2), 3, 2, 0);
+        lcd_write_number(adc_read(3), 3, 2, 5);
+        lcd_write_number(adc_read(4), 3, 2, 10);
+        lcd_write_number(adc_read(5), 3, 2, 15);
+        lcd_write_number(adc_read(6), 3, 2, 20);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            change_submenu(28);
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            break;
+        default:
+            break;
+        }
+        break;
 
     {}
 

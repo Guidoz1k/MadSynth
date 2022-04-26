@@ -15,5 +15,7 @@ void serial1_init();
 
 int8_t serial1_read(uint8_t* buffer, uint8_t bytes);
 
+uint8_t serial1_check(void);
+
 #endif /* SERIAL1 */
 
