@@ -72,6 +72,8 @@
 184 --> slider 3
 185 --> slider 4
 186 --> slider 5
+187 --> key note mod amp
+188 --> key speed mod amp
 
 190 --> noiser state
 191 --> noiser amp

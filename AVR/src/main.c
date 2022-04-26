@@ -238,6 +238,36 @@ void change_submenu(uint8_t submenu){
     menu_state = submenu;
 }
 
+void transmit_on_change(uint16_t code, uint8_t message, uint8_t size){
+    static uint16_t old_value = 0xFF;
+    static uint8_t old_state = 0;
+
+    if(menu_state != old_state){
+        old_value = 0xFF;
+        old_state = menu_state;
+    }
+
+    switch(size){
+    case 1:
+        if(message != old_value){
+            serial1_transmit(code, message);
+            old_value = message;
+        }
+        break;
+    case 2:
+        if(message != old_value){
+            serial1_transmit(code, (0x00FF) & message);
+            serial1_transmit(code + 1, message >> 8);
+            old_value = message;
+        }
+        break;
+    default:
+        break;
+    }
+
+
+}
+
 // ============================================================ main core functions
 
 // delay function for the main loop
@@ -510,8 +540,8 @@ void loop(){
     static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
 
     // low-pass filter variables
-    static STATE filter_state = off_t;
-    static uint16_t cutoff_freq = 0;
+    //static STATE filter_state = off_t;
+    //static uint16_t cutoff_freq = 0;
 
     // reverb effect variables
     // SOCORR
@@ -527,6 +557,8 @@ void loop(){
             //serial0_write_number(i, 2, 0);
             //serial0_write_string(" ON = ", 0);
             //serial0_write_number(key_detection[i].counter, 3, 1);
+            if(key_detection[i].counter == 0)
+                key_detection[i].counter = 1;
             serial1_transmit(i + 1, key_detection[i].counter);
             key_detection[i].stateMachine = 3;
             break;
@@ -857,7 +889,7 @@ void loop(){
     case 30:
         lcd_write_string("00 Volume                ~", 26, 2, 0);
         volume = ui_digit_set(volume, encoder_rotation, 2, 0, 99);
-        serial1_transmit(110, volume);
+        transmit_on_change(110, volume, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -880,7 +912,7 @@ void loop(){
         lcd_write_string("01 Stereo                 ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         stereo = ui_text_set(stereo, encoder_rotation, stereo_t);
-        serial1_transmit(111, stereo);
+        transmit_on_change(111, stereo, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -907,7 +939,7 @@ void loop(){
     case 40:
         lcd_write_string("00 Osc count limit       ~", 26, 2, 0);
         osc_count_limit = ui_digit_set(osc_count_limit, encoder_rotation, 2, 1, MAXVOICES);
-        serial1_transmit(112, osc_count_limit);
+        transmit_on_change(112, osc_count_limit, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -930,7 +962,7 @@ void loop(){
         lcd_write_string("01 Max oscillator mode    ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         max_osc_mode = ui_text_set(max_osc_mode, encoder_rotation, oscm_t);
-        serial1_transmit(113, max_osc_mode);
+        transmit_on_change(113, max_osc_mode, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -957,7 +989,7 @@ void loop(){
     case 50:
         lcd_write_string("00 Octave                ~", 26, 2, 0);
         oct_trans = ui_digit_set(oct_trans, encoder_rotation, 2, 0, 8);
-        serial1_transmit(114, oct_trans);
+        transmit_on_change(114, oct_trans, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -980,7 +1012,7 @@ void loop(){
         lcd_write_string("01 Transpose              ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         note_trans = ui_digit_set(note_trans, encoder_rotation, 2, 0, 12);
-        serial1_transmit(115, note_trans);
+        transmit_on_change(115, note_trans, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1028,9 +1060,9 @@ void loop(){
     */
     case 61:
         lcd_write_string("01 Oscillator 1          ~", 26, 2, 0);
-        mixer1 = ui_digit_set(mixer1, encoder_rotation, 2, 0, 99);
-        serial1_transmit(116, mixer1);
         lcd_write_char(127, 2, 24);
+        mixer1 = ui_digit_set(mixer1, encoder_rotation, 2, 0, 99);
+        transmit_on_change(116, mixer1, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1054,7 +1086,7 @@ void loop(){
         lcd_write_string("02 Oscillator 2           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         mixer2 = ui_digit_set(mixer2, encoder_rotation, 2, 0, 99);
-        serial1_transmit(117, mixer2);
+        transmit_on_change(117, mixer2, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1104,7 +1136,7 @@ void loop(){
         lcd_write_string("01 Shape                 ~", 26, 2, 0);
         //lcd_write_char(127, 2, 24);
         osc1_shape = ui_text_set(osc1_shape, encoder_rotation, shape_t);
-        serial1_transmit(120, osc1_shape);
+        transmit_on_change(120, osc1_shape, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1128,7 +1160,7 @@ void loop(){
         lcd_write_string("02 Sub-oscillators       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_osc_count  = ui_digit_set(osc1_osc_count, encoder_rotation, 2, 0, MAXSVOICES);
-        serial1_transmit(121, osc1_osc_count);
+        transmit_on_change(121, osc1_osc_count, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1202,7 +1234,7 @@ void loop(){
         lcd_write_string("05 Transpose             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_trans = ui_digit_set(osc1_trans, encoder_rotation, 2, 0, MAXTRANS);
-        serial1_transmit(124, osc1_trans );
+        transmit_on_change(124, osc1_trans, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1227,7 +1259,7 @@ void loop(){
         lcd_write_string("06 Cent variation        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_cent = ui_digit_set(osc1_cent, encoder_rotation, 2, 0, 100);
-        serial1_transmit(125, osc1_cent);
+        transmit_on_change(125, osc1_cent, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1252,7 +1284,7 @@ void loop(){
         lcd_write_string("07 Transpose control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_trans_mod = ui_text_set(osc1_trans_mod, encoder_rotation, modifier_t);
-        serial1_transmit(126, osc1_trans_mod);
+        transmit_on_change(126, osc1_trans_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1277,7 +1309,7 @@ void loop(){
         lcd_write_string("08 Cent control           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_cent_mod = ui_text_set(osc1_cent_mod, encoder_rotation, modifier_t);
-        serial1_transmit(127, osc1_cent_mod);
+        transmit_on_change(127, osc1_cent_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1327,7 +1359,7 @@ void loop(){
         lcd_write_string("01 Shape                 ~", 26, 2, 0);
         //lcd_write_char(127, 2, 24);
         osc2_shape = ui_text_set(osc2_shape, encoder_rotation, shape_t);
-        serial1_transmit(130, osc2_shape);
+        transmit_on_change(130, osc2_shape, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1351,7 +1383,7 @@ void loop(){
         lcd_write_string("02 Sub-oscillators       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc2_osc_count = ui_digit_set(osc2_osc_count, encoder_rotation, 2, 0, MAXSVOICES);
-        serial1_transmit(131, osc2_osc_count);
+        transmit_on_change(131, osc2_osc_count, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1422,7 +1454,7 @@ void loop(){
         lcd_write_string("05 Transpose             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc2_trans = ui_digit_set(osc2_trans, encoder_rotation, 2, 0, MAXTRANS);
-        serial1_transmit(134, osc2_trans);
+        transmit_on_change(134, osc2_trans, 1);
         switch(button_pressed){
         case 1:
             //reak;
@@ -1447,7 +1479,7 @@ void loop(){
         lcd_write_string("06 Cent variation        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc2_cent = ui_digit_set(osc2_cent, encoder_rotation, 2, 0, 100);
-        serial1_transmit(135, osc2_cent);
+        transmit_on_change(135, osc2_cent, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1472,7 +1504,7 @@ void loop(){
         lcd_write_string("07 Transpose control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc2_trans_mod = ui_text_set(osc2_trans_mod, encoder_rotation, modifier_t);
-        serial1_transmit(136, osc2_trans_mod);
+        transmit_on_change(136, osc2_trans_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1497,7 +1529,7 @@ void loop(){
         lcd_write_string("08 Cent control           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc2_cent_mod = ui_text_set(osc2_cent_mod, encoder_rotation, modifier_t);
-        serial1_transmit(137, osc2_cent_mod);
+        transmit_on_change(137, osc2_cent_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1548,7 +1580,7 @@ void loop(){
         lcd_write_string("01 Attack time           ~", 26, 2, 0);
         //lcd_write_char(127, 2, 24);
         adsr_a = ui_digit_set(adsr_a, encoder_rotation, 3, 0, MAXADSR);
-        serial1_transmit(140, adsr_a);
+        transmit_on_change(140, adsr_a, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1572,7 +1604,7 @@ void loop(){
         lcd_write_string("02 Decay time            ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_d = ui_digit_set(adsr_d, encoder_rotation, 3, 0, MAXADSR);
-        serial1_transmit(142, adsr_d);
+        transmit_on_change(142, adsr_d, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1597,7 +1629,7 @@ void loop(){
         lcd_write_string("03 Sustain level         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_sl = ui_digit_set(adsr_sl, encoder_rotation, 3, 0, 100);
-        serial1_transmit(146, adsr_sl);
+        transmit_on_change(146, adsr_sl, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1622,7 +1654,7 @@ void loop(){
         lcd_write_string("04 Sustain time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_s = ui_digit_set(adsr_s, encoder_rotation, 3, 0, MAXADSR);
-        serial1_transmit(144, adsr_s);
+        transmit_on_change(144, adsr_s, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1647,7 +1679,7 @@ void loop(){
         lcd_write_string("05 Release time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_r = ui_digit_set(adsr_r, encoder_rotation, 3, 1, MAXADSR);
-        serial1_transmit(148, adsr_r);
+        transmit_on_change(148, adsr_r, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1672,7 +1704,7 @@ void loop(){
         lcd_write_string("06 Attack control        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_a_mod = ui_text_set(adsr_a_mod, encoder_rotation, modifier_t);
-        serial1_transmit(150, adsr_a_mod);
+        transmit_on_change(150, adsr_a_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1697,7 +1729,7 @@ void loop(){
         lcd_write_string("07 Decay control         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_d_mod = ui_text_set(adsr_d_mod, encoder_rotation, modifier_t);
-        serial1_transmit(151, adsr_d_mod);
+        transmit_on_change(151, adsr_d_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1722,7 +1754,7 @@ void loop(){
         lcd_write_string("08 Sustain lvl control   ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_sl_mod = ui_text_set(adsr_sl_mod, encoder_rotation, modifier_t);
-        serial1_transmit(152, adsr_sl_mod);
+        transmit_on_change(152, adsr_sl_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1747,7 +1779,7 @@ void loop(){
         lcd_write_string("09 Sustain control       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_s_mod = ui_text_set(adsr_s_mod, encoder_rotation, modifier_t);
-        serial1_transmit(153, adsr_s_mod);
+        transmit_on_change(153, adsr_s_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1772,7 +1804,7 @@ void loop(){
         lcd_write_string("10 Release control       ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_r_mod = ui_text_set(adsr_r_mod, encoder_rotation, modifier_t);
-        serial1_transmit(154, adsr_r_mod);
+        transmit_on_change(154, adsr_r_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1799,7 +1831,7 @@ void loop(){
     case 130:
         lcd_write_string("00 Pitch bend amplitude  ~", 26, 2, 0);
         amp_pw = ui_digit_set(amp_pw, encoder_rotation, 2, 0, 99);
-        serial1_transmit(180, amp_pw);
+        transmit_on_change(180, amp_pw, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1822,7 +1854,7 @@ void loop(){
         lcd_write_string("01 Pitch mod amplitude   ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_mw = ui_digit_set(amp_mw, encoder_rotation, 2, 0, 99);
-        serial1_transmit(181, amp_mw);
+        transmit_on_change(181, amp_mw, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1847,6 +1879,7 @@ void loop(){
         lcd_write_string("02 Key note amplitude    ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_kn = ui_digit_set(amp_kn, encoder_rotation, 2, 0, 99);
+        transmit_on_change(187, amp_kn, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1871,6 +1904,7 @@ void loop(){
         lcd_write_string("03 Key speed amplitude   ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_ks = ui_digit_set(amp_ks, encoder_rotation, 2, 0, 99);
+        transmit_on_change(188, amp_ks, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1895,7 +1929,7 @@ void loop(){
         lcd_write_string("04 Slider 1 amplitude    ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_s1 = ui_digit_set(amp_s1, encoder_rotation, 2, 0, 99);
-        serial1_transmit(182, amp_s1);
+        transmit_on_change(182, amp_s1, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1920,7 +1954,7 @@ void loop(){
         lcd_write_string("05 Slider 2 amplitude    ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_s2 = ui_digit_set(amp_s2, encoder_rotation, 2, 0, 99);
-        serial1_transmit(183, amp_s2);
+        transmit_on_change(183, amp_s2, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1945,7 +1979,7 @@ void loop(){
         lcd_write_string("06 Slider 3 amplitude    ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_s3 = ui_digit_set(amp_s3, encoder_rotation, 2, 0, 99);
-        serial1_transmit(184, amp_s3);
+        transmit_on_change(184, amp_s3, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1970,7 +2004,7 @@ void loop(){
         lcd_write_string("07 Slider 4 amplitude    ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_s4 = ui_digit_set(amp_s4, encoder_rotation, 2, 0, 99);
-        serial1_transmit(185, amp_s4);
+        transmit_on_change(185, amp_s4, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -1995,7 +2029,7 @@ void loop(){
         lcd_write_string("08 Slider 5 amplitude     ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         amp_s5 = ui_digit_set(amp_s5, encoder_rotation, 2, 0, 99);
-        serial1_transmit(186, amp_s5);
+        transmit_on_change(186, amp_s5, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2022,7 +2056,7 @@ void loop(){
     case 150:
         lcd_write_string("00 State                 ~", 26, 2, 0);
         lfo1_state = ui_text_set(lfo1_state, encoder_rotation, state_t);
-        serial1_transmit(160, lfo1_state);
+        transmit_on_change(160, lfo1_state, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2069,7 +2103,7 @@ void loop(){
         lcd_write_string("02 Shape                 ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_shape = ui_text_set(lfo1_shape, encoder_rotation, shape_t);
-        serial1_transmit(162, lfo1_shape);
+        transmit_on_change(162, lfo1_shape, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2094,7 +2128,7 @@ void loop(){
         lcd_write_string("03 Mode                  ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_mode = ui_text_set(lfo1_mode, encoder_rotation, oscm_t);
-        serial1_transmit(161, lfo1_mode);
+        transmit_on_change(161, lfo1_mode, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2119,7 +2153,7 @@ void loop(){
         lcd_write_string("04 Amplitude             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_amp = ui_digit_set(lfo1_amp, encoder_rotation, 2, 1, 99);
-        serial1_transmit(163, lfo1_amp);
+        transmit_on_change(163, lfo1_amp, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2144,7 +2178,7 @@ void loop(){
         lcd_write_string("05 Frequency             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_freq = ui_digit_set(lfo1_freq, encoder_rotation, 3, 1, 250);
-        serial1_transmit(164, lfo1_freq);
+        transmit_on_change(164, lfo1_freq, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2169,7 +2203,7 @@ void loop(){
         lcd_write_string("06 Amplitude control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_amp_mod = ui_text_set(lfo1_amp_mod, encoder_rotation, modifier_t);
-        serial1_transmit(165, lfo1_amp_mod);
+        transmit_on_change(165, lfo1_amp_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2194,7 +2228,7 @@ void loop(){
         lcd_write_string("07 Frequency control      ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_freq_mod = ui_text_set(lfo1_freq_mod, encoder_rotation, modifier_t);
-        serial1_transmit(166, lfo1_freq_mod);
+        transmit_on_change(166, lfo1_freq_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2221,7 +2255,7 @@ void loop(){
     case 160:
         lcd_write_string("00 State                 ~", 26, 2, 0);
         lfo2_state = ui_text_set(lfo2_state, encoder_rotation, state_t);
-        serial1_transmit(170, lfo2_state);
+        transmit_on_change(170, lfo2_state, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2268,7 +2302,7 @@ void loop(){
         lcd_write_string("02 Shape                 ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_shape = ui_text_set(lfo2_shape, encoder_rotation, shape_t);
-        serial1_transmit(172, lfo2_shape);
+        transmit_on_change(172, lfo2_shape, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2293,7 +2327,7 @@ void loop(){
         lcd_write_string("03 Mode                  ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_mode = ui_text_set(lfo2_mode, encoder_rotation, oscm_t);
-        serial1_transmit(171, lfo2_mode);
+        transmit_on_change(171, lfo2_mode, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2318,7 +2352,7 @@ void loop(){
         lcd_write_string("04 Amplitude             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_amp = ui_digit_set(lfo2_amp, encoder_rotation, 2, 1, 99);
-        serial1_transmit(173, lfo2_amp);
+        transmit_on_change(173, lfo2_amp, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2343,7 +2377,7 @@ void loop(){
         lcd_write_string("05 Frequency             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_freq = ui_digit_set(lfo2_freq, encoder_rotation, 3, 1, 250);
-        serial1_transmit(174, lfo2_freq);
+        transmit_on_change(174, lfo2_freq, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2368,7 +2402,7 @@ void loop(){
         lcd_write_string("06 Amplitude control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_amp_mod = ui_text_set(lfo2_amp_mod, encoder_rotation, modifier_t);
-        serial1_transmit(175, lfo2_amp_mod);
+        transmit_on_change(175, lfo2_amp_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2393,7 +2427,7 @@ void loop(){
         lcd_write_string("07 Frequency control      ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_freq_mod = ui_text_set(lfo2_freq_mod, encoder_rotation, modifier_t);
-        serial1_transmit(176, lfo2_freq_mod);
+        transmit_on_change(176, lfo2_freq_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2472,7 +2506,7 @@ void loop(){
     case 180:
         lcd_write_string("00 MOD ENV State         ~", 26, 2, 0);
         me_state = ui_text_set(me_state, encoder_rotation, state_t);
-        serial1_transmit(120, me_state);
+        transmit_on_change(199, me_state, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2522,7 +2556,7 @@ void loop(){
         lcd_write_string("02 Attack time           ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_a = ui_digit_set(me_a, encoder_rotation, 3, 0, MAXADSR);
-        serial1_transmit(200, me_a);
+        transmit_on_change(200, me_a, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2547,7 +2581,7 @@ void loop(){
         lcd_write_string("03 Decay time            ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_d = ui_digit_set(me_d, encoder_rotation, 3, 0, MAXADSR);
-        serial1_transmit(202, me_d);
+        transmit_on_change(202, me_d, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2572,7 +2606,7 @@ void loop(){
         lcd_write_string("04 Sustain level         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_sl = ui_digit_set(me_sl, encoder_rotation, 3, 0, 100);
-        serial1_transmit(206, me_sl);
+        transmit_on_change(206, me_sl, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2597,7 +2631,7 @@ void loop(){
         lcd_write_string("05 Sustain time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_s = ui_digit_set(me_s, encoder_rotation, 3, 0, MAXADSR);
-        serial1_transmit(204, me_s);
+        transmit_on_change(204, me_s, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2622,7 +2656,7 @@ void loop(){
         lcd_write_string("06 Release time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_r = ui_digit_set(me_r, encoder_rotation, 3, 1, MAXADSR);
-        serial1_transmit(208, me_r);
+        transmit_on_change(208, me_r, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2647,7 +2681,7 @@ void loop(){
         lcd_write_string("07 Attack control        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_a_mod = ui_text_set(me_a_mod, encoder_rotation, modifier_t);
-        serial1_transmit(150, me_a_mod);
+        transmit_on_change(210, me_a_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2672,7 +2706,7 @@ void loop(){
         lcd_write_string("08 Decay control         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_d_mod = ui_text_set(me_d_mod, encoder_rotation, modifier_t);
-        serial1_transmit(150, me_d_mod);
+        transmit_on_change(211, me_d_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2697,7 +2731,7 @@ void loop(){
         lcd_write_string("09 Sustain lvl control   ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_sl_mod = ui_text_set(me_sl_mod, encoder_rotation, modifier_t);
-        serial1_transmit(150, me_sl_mod);
+        transmit_on_change(212, me_sl_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2722,7 +2756,7 @@ void loop(){
         lcd_write_string("10 Sustain control       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_s_mod = ui_text_set(me_s_mod, encoder_rotation, modifier_t);
-        serial1_transmit(150, me_s_mod);
+        transmit_on_change(213, me_s_mod, 1);
         switch(button_pressed){
         case 1:
             //break;
@@ -2747,7 +2781,7 @@ void loop(){
         lcd_write_string("11 Release control       ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_r_mod = ui_text_set(me_r_mod, encoder_rotation, modifier_t);
-        serial1_transmit(150, me_r_mod);
+        transmit_on_change(214, me_r_mod, 1);
         switch(button_pressed){
         case 1:
             //break;

@@ -412,6 +412,123 @@ static int_fast32_t bobMax = BOBMAX << 10;
 static int_fast8_t voice_number = 255;      // 255 - 0 available voice slots
 static int_fast8_t voice_counter = 0;       // 0 - VOICEM number of voices
 
+/*
+    typedef enum _mod{
+        none = 0,
+        lfo1 = 1,
+        lfo2 = 2,
+        noiser = 3,
+        note = 4,
+        speed = 5,
+        pitch_w = 6,
+        mod_w = 7,
+        slider1 = 8,
+        slider2 = 9,
+        slider3 = 10,
+        slider4 = 11,
+        slider5 = 12
+    } MODIFIER;
+    typedef enum _shape{
+        sinusoid = 0,
+        triangle = 1,
+        square = 2,
+        sawtooth = 3,
+        inv_sawtooth = 4
+    } SHAPE;
+    typedef enum _oscm{
+        frees = 0,
+        retriggers = 1
+    } O_MODE;
+
+    typedef enum _state{
+        off_t = 0,
+        on_t = 1
+    } STATE;
+    static int8_t volume = 50;  // 0 ... 99
+    static enum _stereo{
+        l_r,
+        l_only,
+        r_only
+    } stereo = l_r;
+
+    static uint8_t osc_count_limit = 61;
+    static uint8_t max_osc_mode = frees;
+
+    // oct_trans - piano has 9 octaves, our synth has 5, it starts at the second already - 0 ... (4 * 12) = 48
+    static uint8_t oct_trans = 2; // 2 * 12
+    static uint8_t note_trans = 0; // 2 * 12
+    static uint8_t mixer1 = 50; // mixer's first channel
+    static uint8_t mixer2 = 50; // mixer's second channel
+
+    static SHAPE osc1_shape = sinusoid;
+    static uint8_t osc1_osc_count = 0; // 0 ... 5(?)
+    //static SO_MODE osc1_osc_mode = harmonic;              all sub oscillators are harmonic
+    //static uint8_t osc1_osc_unison = 0; // 0 ... 100
+    static int8_t osc1_trans = 0;  // transpose -24 ... 24
+    static int8_t osc1_cent = 0;   // 0 ... 100
+    static MODIFIER osc1_trans_mod = none; // modifier for osc trans
+    static MODIFIER osc1_cent_mod = none;  // modifier for osc cent
+
+    static SHAPE osc2_shape = sinusoid;
+    static uint8_t osc2_osc_count = 0; // 0 ... 5(?)
+    //static SO_MODE osc2_osc_mode = harmonic;              all sub oscillators are harmonic
+    //static uint8_t osc2_osc_unison = 0; // 0 ... 100
+    static int8_t osc2_trans = 0;  // transpose -24 ... 24
+    static int8_t osc2_cent = 0;   // 0 ... 100
+    static MODIFIER osc2_trans_mod = none; // modifier for osc trans
+    static MODIFIER osc2_cent_mod = none;  // modifier for osc cent
+
+    static uint16_t adsr_a = 0;    // 0 ... 10000 ms
+    static uint16_t adsr_d = 0;    // 0 ... 10000 ms
+    static uint16_t adsr_s = 0;    // 0 ... 10000 ms
+    static uint16_t adsr_sl = 0;   // 0 ... 100%
+    static uint16_t adsr_r = 1;    // 1 ... 10000 ms
+    static MODIFIER adsr_a_mod = none;    // modifier for adsr A parameter
+    static MODIFIER adsr_d_mod = none;    // modifier for adsr D parameter
+    static MODIFIER adsr_s_mod = none;    // modifier for adsr S parameter
+    static MODIFIER adsr_sl_mod = none;   // modifier for adsr SL parameter
+    static MODIFIER adsr_r_mod = none;    // modifier for adsr R parameter
+
+    static uint8_t amp_pw = 0;  // 0 ... 99
+    static uint8_t amp_mw = 0;  // 0 ... 99
+    static uint8_t amp_kn = 0;  // 0 ... 99
+    static uint8_t amp_ks = 0;  // 0 ... 99
+    static uint8_t amp_s1 = 0;  // 0 ... 99
+    static uint8_t amp_s2 = 0;  // 0 ... 99
+    static uint8_t amp_s3 = 0;  // 0 ... 99
+    static uint8_t amp_s4 = 0;  // 0 ... 99
+    static uint8_t amp_s5 = 0;  // 0 ... 99
+
+    static STATE lfo1_state = off_t; // 0 - off, 1 - on
+    static O_MODE lfo1_mode = frees;
+    static SHAPE lfo1_shape = sinusoid;
+    static uint8_t lfo1_amp = 0;   // 0 ... 100
+    static uint8_t lfo1_freq = 0;  // 0 ... 250
+    static MODIFIER lfo1_amp_mod = none;  // modifier for lfo1 amplitude
+    static MODIFIER lfo1_freq_mod = none; // modifier for lfo1 frequency
+
+    static STATE lfo2_state = off_t; // 0 - off, 1 - on
+    static O_MODE lfo2_mode = frees;
+    static SHAPE lfo2_shape = sinusoid;
+    static uint8_t lfo2_amp = 0;   // 0 ... 100
+    static uint8_t lfo2_freq = 0;  // 0 ... 250
+    static MODIFIER lfo2_amp_mod = none;  // modifier for lfo2 amplitude
+    static MODIFIER lfo2_freq_mod = none; // modifier for lfo2 frequency
+
+    // MOD ENV variables
+    static STATE me_state = off_t;      // 0 - off, 1 - on
+    static uint16_t me_a = 0;       // 0 ... 10000 ms
+    static uint16_t me_d = 0;       // 0 ... 10000 ms
+    static uint16_t me_s = 0;       // 0 ... 10000 ms
+    static uint16_t me_sl = 0;      // 0 ... 100%
+    static uint16_t me_r = 1;       // 1 ... 10000 ms
+    static MODIFIER me_a_mod = none;    // modifier for MOD ENV A parameter
+    static MODIFIER me_d_mod = none;    // modifier for MOD ENV D parameter
+    static MODIFIER me_s_mod = none;    // modifier for MOD ENV S parameter
+    static MODIFIER me_sl_mod = none;   // modifier for MOD ENV SL parameter
+    static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
+*/
+
 void addVoice(uint16_t frequency, uint16_t vol, uint16_t number){
     if((voice_number > 0) && (voice_counter < VOICEM)){
         volume[number] = vol;
