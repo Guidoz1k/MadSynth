@@ -414,8 +414,20 @@ static int_fast32_t bobMax = BOBMAX << 10;
 static int_fast8_t voice_number = 255;      // 255 - 0 available voice slots
 static int_fast8_t voice_counter = 0;       // 0 - VOICEM number of voices
 
-// DDS control variables
+uint32_t keys_freq[108] = {
+    164,    173,    184,    194,    206,    218,    231,    245,    260,    275,    291,    309,
+    327,    346,    367,    389,    412,    437,    462,    490,    519,    550,    583,    617,
+    654,    693,    734,    778,    824,    873,    925,    980,    1038,   1100,   1165,   1235,
+    1308,   1386,   1468,   1556,   1648,   1746,   1850,   1960,   2077,   2200,   2331,   2470,
+    2616,   2772,   2937,   3111,   3296,   3492,   3670,   3920,   4153,   4400,   4662,   4939,
+    5233,   5544,   5873,   6223,   6593,   6985,   7400,   7840,   8306,   8800,   9323,   9878,
+    10465,  11087,  11747,  12445,  13185,  13969,  14800,  15680,  16612,  17600,  18647,  19755,
+    20930,  22175,  23493,  24890,  26370,  27938,  29600,  31360,  33224,  35200,  37293,  39511,
+    41860,  44349,  46986,  49780,  52740,  55877,  59109,  62719,  66449,  70400,  74586,  79021,
+};
 
+// DDS control variables
+/*
 typedef enum _mod{
     none = 0,
     lfo1 = 1,
@@ -447,7 +459,8 @@ typedef enum _state{
     off_t = 0,
     on_t = 1
 } STATE;
-static uint8_t volume = 50;  // 0 ... 99
+
+static uint8_t main_volume = 50;  // 0 ... 99
 static enum _stereo{
     l_r,
     l_only,
@@ -462,6 +475,7 @@ static uint8_t oct_trans = 2; // 2 * 12
 static uint8_t note_trans = 0; // 2 * 12
 static uint8_t mixer1 = 50; // mixer's first channel
 static uint8_t mixer2 = 50; // mixer's second channel
+
 
 static SHAPE osc1_shape = sinusoid;
 static uint8_t osc1_osc_count = 0; // 0 ... 5(?)
@@ -530,15 +544,16 @@ static MODIFIER me_d_mod = none;    // modifier for MOD ENV D parameter
 static MODIFIER me_s_mod = none;    // modifier for MOD ENV S parameter
 static MODIFIER me_sl_mod = none;   // modifier for MOD ENV SL parameter
 static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
+*/
 
 // ============================================================ TASK 0 FUNCTIONS
 
-void addVoice(uint16_t frequency, uint16_t vol, uint16_t number){
+void addVoice(uint32_t frequency, uint16_t vol, uint16_t number){
     if((voice_number > 0) && (voice_counter < VOICEM)){
         volume[number] = vol;
         voice_number -= vol;
         //voices[number].counter = 0;
-        increment[number] = 256 * frequency / 5;
+        increment[number] = 256 * frequency / 50;
         voice_counter++;
     }
 }
@@ -572,15 +587,16 @@ void serial_ops(void){
     uart_count += serial1_read(&uart_code, 1);
     uart_count += serial1_read(&uart_message, 1);
 
-    if(uart_count == 2)          /////////////////////////////////////////////////////////////////////////////////////////
+    if(uart_count == 2){
         if((uart_code >= 1) && (uart_code <= 108)){
             if(uart_message == 0)
-                uart_count = 0;// mata a voz //////////////////////////////////////////////////////////////////////////////
+                removeVoice(0);
             else
-                uart_count = 0;// liga a voz //////////////////////////////////////////////////////////////////////////////
+                addVoice(keys_freq[47 + uart_code], 250, 0);
         }
         else
             serial_command(uart_code, uart_message);
+    }
 }
 
 // ============================================================ MAIN FUNCTIONS
@@ -604,7 +620,7 @@ void task0(void){ // can't use float in ISR
 }
 
 void task1(void){
-    volatile static uint_fast8_t led = 0;
+    //volatile static uint_fast8_t led = 0;
 
     while((serial1_check() / 2) > 0){
         serial_ops();
@@ -629,5 +645,4 @@ void task_init(void){
         bob[aux] /= 255;
         bob2[aux] /= 255;
     }
-    addVoice(650, 255, 0);
 }
