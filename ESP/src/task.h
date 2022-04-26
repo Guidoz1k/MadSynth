@@ -11,17 +11,17 @@
 
 #include "i2s_imp.h"
 
-#define BOBMAX  2000
-#define LEDPIN  2       // built-in led pin
-#define VOICEM  61
+#define LUTSIZE     2000
+#define LEDPIN      2       // built-in led pin
+#define VOICEM      61
+#define BROKENF     10
 
-#define REVERB  20000
 
 void task0(void);
 
 void task1(void);
 
-void core1_loop(void);
+//void core1_loop(void);
 
 void task_init(void);
 

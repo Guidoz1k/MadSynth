@@ -52,7 +52,7 @@ typedef enum _texts{
     soscm_t = 4,
     state_t = 5
 } TEXTS;
-char MODIFIER_TEXT[13][26] = {
+char MODIFIER_TEXT[14][26] = {
     " none                     ",
     " LFO 1                    ",
     " LFO 2                    ",
@@ -66,6 +66,7 @@ char MODIFIER_TEXT[13][26] = {
     " Slider 3                 ",
     " Slider 4                 ",
     " Slider 5                 ",
+    " Mod Envelope             "
 };
 char SHAPE_TEXT[5][26] = {
     " Sinusoid                 ",
@@ -133,10 +134,10 @@ uint8_t ui_text_set(uint8_t old_value, int8_t ticks, TEXTS text_type){
         case modifier_t:
             unlimited += ticks;
             if(unlimited >= 0){
-                if(unlimited <= 12)
+                if(unlimited <= 13)
                     new_value = (uint8_t)unlimited;
                 else
-                    new_value = 12;
+                    new_value = 13;
             }
             else
                 new_value = 0;
@@ -413,7 +414,8 @@ void loop(){
         slider2 = 9,
         slider3 = 10,
         slider4 = 11,
-        slider5 = 12
+        slider5 = 12,
+        mod_env = 13
     } MODIFIER;
     typedef enum _shape{
         sinusoid = 0,
