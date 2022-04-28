@@ -15,15 +15,20 @@ void serial0_init(){
     uart_driver_install(UART_NUM_0, 2048, 0, 0, NULL, 0);
 }
 
-void serial0_write_number(uint_fast8_t number){
-    char buffer[4];
+void serial0_write_number(uint_fast8_t number, uint_fast8_t newline){
+    char buffer[6];
 
-    buffer[0] = (number / 100) + 48;
-    buffer[1] = ((number / 10) % 10) + 48;
-    buffer[2] = (number % 10) + 48;
-    buffer[3] = ' ';
+    buffer[0] = (number / 10000) + 48;
+    buffer[1] = ((number / 1000) % 10) + 48;
+    buffer[2] = ((number / 100) % 10) + 48;
+    buffer[3] = ((number / 10) % 10) + 48;
+    buffer[4] = (number % 10) + 48;
+    if(newline)
+        buffer[5] = '\n';
+    else
+        buffer[5] = ' ';
 
-    uart_write_bytes(UART_NUM_0, buffer, 4);
+    uart_write_bytes(UART_NUM_0, buffer, 6);
 }
 
 void serial0_write_hex(uint_fast32_t number){

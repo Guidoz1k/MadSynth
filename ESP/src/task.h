@@ -16,6 +16,8 @@
 #define VOICEM      61
 #define BROKENF     10
 
+#define PI          3.1415926
+
 
 void task0(void);
 

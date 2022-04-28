@@ -1037,7 +1037,7 @@ void loop(){
     { // Keybed offset config
     case 50:
         lcd_write_string("00 Octave                ~", 26, 2, 0);
-        oct_trans = ui_digit_set(oct_trans, encoder_rotation, 2, 0, 8);
+        oct_trans = ui_digit_set(oct_trans, encoder_rotation, 2, 0, 4);
         transmit_on_change(114, oct_trans, 1);
         switch(button_pressed){
         case 1:

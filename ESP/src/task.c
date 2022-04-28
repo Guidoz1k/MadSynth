@@ -722,11 +722,11 @@ volatile uint_fast32_t increment[VOICEM] = {0};    // 52.2 * freq
 volatile uint_fast32_t counter[VOICEM] = {0};      // position in LUT
 volatile uint_fast8_t channel_alloc[VOICEM] = {0};
 
-static uint_fast32_t bobMax = LUTSIZE << 10;
-static uint_fast8_t voice_counter = 0;       // 0 - VOICEM number of voices
-static int_fast8_t soft_atenuator = 0;
+uint_fast32_t bobMax = LUTSIZE << 10;
+uint_fast8_t voice_counter = 0;       // 0 - VOICEM number of voices
+int_fast8_t soft_atenuator = 0;
 
-uint32_t keys_freq[108 + 48] = {
+uint32_t keys_freq[108] = {
     164,    173,    184,    194,    206,    218,    231,    245,    260,    275,    291,    309,
     327,    346,    367,    389,    412,    437,    462,    490,    519,    550,    583,    617,
     654,    693,    734,    778,    824,    873,    925,    980,    1038,   1100,   1165,   1235,
@@ -735,17 +735,18 @@ uint32_t keys_freq[108 + 48] = {
     5233,   5544,   5873,   6223,   6593,   6985,   7400,   7840,   8306,   8800,   9323,   9878,
     10465,  11087,  11747,  12445,  13185,  13969,  14800,  15680,  16612,  17600,  18647,  19755,
     20930,  22175,  23493,  24890,  26370,  27938,  29600,  31360,  33224,  35200,  37293,  39511,
-    41860,  44349,  46986,  49780,  52740,  55877,  59109,  62719,  66449,  70400,  74586,  79021,
-    BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,
-    BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,
-    BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,
-    BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,BROKENF,
+    41860,  44349,  46986,  49780,  52740,  55877,  59109,  62719,  66449,  70400,  74586,  79021
 };
-volatile uint_fast8_t notes[VOICEM] = {0};
 
 static uint8_t oct_trans = 2;
 static uint8_t note_trans = 0;
 
+// low-pass filter variables
+int32_t cutoff_freq = 100; // variavel real
+float    filter_alpha = 0;
+int32_t filter_factor = 10000;
+int32_t inp_factor = 0;
+int32_t out_factor = 0;
 
 // DDS control variables
 /*
@@ -934,6 +935,8 @@ void task0(void){ // can't use float in ISR
     uint_fast8_t aux = 0;
     uint_fast32_t localCounter = 0;
 
+    static int_fast32_t filter_l = 0;
+    static int_fast32_t filter_r = 0;
 
     for(aux = 0; aux < VOICEM; aux++){
         localCounter = counter[aux];
@@ -942,6 +945,7 @@ void task0(void){ // can't use float in ISR
             localCounter -= bobMax;
             if(channel_alloc[aux] == 2){
                 increment[aux] = 0;
+                localCounter = 0;
                 channel_alloc[aux] = 3;
             }
         }
@@ -952,7 +956,12 @@ void task0(void){ // can't use float in ISR
     out_l *= soft_atenuator;
     out_r *= soft_atenuator;
 
-    i2s_output(out_r, out_l);  // R - L
+    // filter
+    filter_r = ((out_r * inp_factor)/filter_factor) + ((out_factor * filter_r)/filter_factor);
+    filter_l = ((out_l * inp_factor)/filter_factor) + ((out_factor * filter_l)/filter_factor);
+
+    //i2s_output(out_r, out_l);  // R - L
+    i2s_output(filter_r, filter_l);
 }
 
 void task1(void){
@@ -1008,4 +1017,8 @@ void task_init(void){
         lut_l[aux] /= reduction;
         lut_r[aux] /= reduction;
     }
+
+    filter_alpha = (2 * PI * cutoff_freq) / 40000;
+    inp_factor = (uint32_t)((float)(filter_factor * filter_alpha) / (float)(1 + filter_alpha));
+    out_factor = (uint32_t)((float)(filter_factor) / (float)(1 + filter_alpha));
 }
