@@ -528,8 +528,8 @@ void loop(){
         r_only
     } stereo = l_r;
 
-    static uint8_t osc_count_limit = 1;
-    static uint8_t max_osc_mode = frees;
+    //static uint8_t osc_count_limit = 1;
+    //static uint8_t max_osc_mode = frees;
 
     /* oct_trans
     piano has 9 octaves, our synth has 5, it starts at the second already
@@ -698,7 +698,7 @@ void loop(){
             menu_state = 30;
             break;
         case 4:
-            menu_state = 1;
+            menu_state = 2;
             break;
         case 5:
             break;
@@ -706,6 +706,7 @@ void loop(){
             break;
         }
         break;
+    /*
     case 1: // Oscillators allocation
         lcd_write_string("01 OSC allocation        ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
@@ -729,8 +730,9 @@ void loop(){
             break;
         }
         break;
+    */
     case 2: // Keybed offset config
-        lcd_write_string("02 Keybed offset config  ~", 26, 0, 0);
+        lcd_write_string("01 Keybed offset config  ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -746,14 +748,14 @@ void loop(){
             menu_state = 3;
             break;
         case 5:
-            menu_state = 1;
+            menu_state = 0;
             break;
         default:
             break;
         }
         break;
     case 3: // Stereo Oscillator Mixer
-        lcd_write_string("03 Oscillators mixer     ~", 26, 0, 0);
+        lcd_write_string("02 Oscillators mixer     ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -776,7 +778,7 @@ void loop(){
         }
         break;
     case 4: // Oscillator 1 controls
-        lcd_write_string("04 OSC 1 controls        ~", 26, 0, 0);
+        lcd_write_string("03 OSC 1 controls        ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -799,7 +801,7 @@ void loop(){
         }
         break;
     case 5: // Oscillator 2 controls
-        lcd_write_string("05 OSC 2 controls        ~", 26, 0, 0);
+        lcd_write_string("04 OSC 2 controls        ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -822,7 +824,7 @@ void loop(){
         }
         break;
     case 6: // ADSR-5 parameters
-        lcd_write_string("07 ADSR-5 parameters     ~", 26, 0, 0);
+        lcd_write_string("05 ADSR-5 parameters     ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -845,7 +847,7 @@ void loop(){
         }
         break;
     case 7: // Modifiers bend/mod/press
-        lcd_write_string("08 Control modifiers     ~", 26, 0, 0);
+        lcd_write_string("06 Control modifiers     ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -868,7 +870,7 @@ void loop(){
         }
         break;
     case 8: // LFO controls
-        lcd_write_string("09 LFO 1 Controls        ~", 26, 0, 0);
+        lcd_write_string("07 LFO 1 Controls        ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -891,7 +893,7 @@ void loop(){
         }
         break;
     case 9: // LFO controls
-        lcd_write_string("10 LFO 2 Controls        ~", 26, 0, 0);
+        lcd_write_string("08 LFO 2 Controls        ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -914,7 +916,7 @@ void loop(){
         }
         break;
     case 10: // Randomizer controls
-        lcd_write_string("11 Noise controls      X ~", 26, 0, 0);
+        lcd_write_string("09 Noise controls      X ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -938,7 +940,7 @@ void loop(){
         }
         break;
     case 11: // Modifier Envelope controls
-        lcd_write_string("12 MOD ENV controls       ", 26, 0, 0);
+        lcd_write_string("10 MOD ENV controls       ", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -1011,9 +1013,10 @@ void loop(){
         break;
     }
 
+/*
     {}
 
-    { // Oscillators allocation
+    { // Oscillators allocation NOT IMPLEMENTED
     case 40:
         lcd_write_string("00 Osc count limit       ~", 26, 2, 0);
         osc_count_limit = ui_digit_set(osc_count_limit, encoder_rotation, 2, 1, MAXVOICES);
@@ -1060,8 +1063,9 @@ void loop(){
         }
         break;
     }
-
+*/
     {}
+
 
     { // Keybed offset config
     case 50:

@@ -9,8 +9,8 @@
 
 110 --> volume			--> 0 ... 99?
 111	--> stereo mode		--> L+R, L, R
-112	--> osc count limit	--> 0 ... MAXOSC
-113	--> max osc mode	--> 0 or 1
+112	--> osc count limit	--> 0 ... MAXOSC	X
+113	--> max osc mode	--> 0 or 1			X
 114	--> octave			--> 0 ... 8 octaves to the right
 115	--> octave + trans	--> 0 ... 12 keys in a octave
 116 --> mixer channel 1 --> 0 ... 99?
