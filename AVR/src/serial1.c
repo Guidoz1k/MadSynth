@@ -12,7 +12,7 @@
 112	--> osc count limit	--> 0 ... MAXOSC	X
 113	--> max osc mode	--> 0 or 1			X
 114	--> octave			--> 0 ... 8 octaves to the right
-115	--> octave + trans	--> 0 ... 12 keys in a octave
+115	--> trans			--> OSC1 trans
 116 --> mixer channel 1 --> 0 ... 99?
 117 --> mixer channel 1 --> 0 ... 99?
 
@@ -28,10 +28,10 @@
 131	-->	OSC2 # sub-osc
 132	-->	OSC2 sub-osc mode   X
 133	-->	OSC2 sub-osc unison X
-134	-->	OSC2 transpose
-135	-->	OSC2 cent
-136	-->	OSC2 trans_mod
-137	-->	OSC2 cent_mod
+134	-->	OSC2 transpose		X
+135	-->	OSC2 cent			X
+136	-->	OSC2 trans_mod		X
+137	-->	OSC2 cent_mod		X
 
 140	--> ADSR A time	0	-->	first byte
 141	--> ADSR A time	1	--> second byte when necessary

@@ -15,20 +15,32 @@ void serial0_init(){
     uart_driver_install(UART_NUM_0, 2048, 0, 0, NULL, 0);
 }
 
-void serial0_write_number(uint_fast8_t number, uint_fast8_t newline){
-    char buffer[6];
+void serial0_write_number(int_fast32_t number, uint_fast8_t newline){
+    char buffer[12];
 
-    buffer[0] = (number / 10000) + 48;
-    buffer[1] = ((number / 1000) % 10) + 48;
-    buffer[2] = ((number / 100) % 10) + 48;
-    buffer[3] = ((number / 10) % 10) + 48;
-    buffer[4] = (number % 10) + 48;
+    if(number > 0)
+        buffer[0] = '+';
+    else{
+        buffer[0] = '-';
+        number *= -1;
+    }
+
+    buffer[1] = ((number / (int_fast32_t)1000000000) % 10) + 48;
+    buffer[2] = ((number / (int_fast32_t)100000000) % 10) + 48;
+    buffer[3] = ((number / (int_fast32_t)10000000) % 10) + 48;
+    buffer[4] = ((number / (int_fast32_t)1000000) % 10) + 48;
+    buffer[5] = ((number / (int_fast32_t)100000) % 10) + 48;
+    buffer[6] = ((number / 10000) % 10) + 48;
+    buffer[7] = ((number / 1000) % 10) + 48;
+    buffer[8] = ((number / 100) % 10) + 48;
+    buffer[9] = ((number / 10) % 10) + 48;
+    buffer[10] = (number % 10) + 48;
     if(newline)
-        buffer[5] = '\n';
+        buffer[11] = '\n';
     else
-        buffer[5] = ' ';
+        buffer[11] = ' ';
 
-    uart_write_bytes(UART_NUM_0, buffer, 6);
+    uart_write_bytes(UART_NUM_0, buffer, 12);
 }
 
 void serial0_write_hex(uint_fast32_t number){

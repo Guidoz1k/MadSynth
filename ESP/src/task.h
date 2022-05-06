@@ -14,7 +14,8 @@
 #define LUTSIZE     2000
 #define LEDPIN      2       // built-in led pin
 #define VOICEM      61
-#define BROKENF     10
+#define BROKELF     150
+#define BROKEHF     80000
 
 #define PI          3.1415926
 

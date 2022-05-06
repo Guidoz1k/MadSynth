@@ -13,7 +13,7 @@
 
 void serial0_init();
 
-void serial0_write_number(uint_fast8_t number, uint_fast8_t newline);
+void serial0_write_number(int_fast32_t number, uint_fast8_t newline);
 
 void serial0_write_hex(uint_fast32_t number);
 

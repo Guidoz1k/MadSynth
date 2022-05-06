@@ -200,3 +200,14 @@ void lcd_write_char(const char pointer, uint8_t line, uint8_t pos){
 
 	lcd_write(pointer, sector);
 }
+
+void lcd_signed_number(int16_t number, uint8_t size, uint8_t line, uint8_t pos){
+    if(number >= 0){
+        lcd_write_char('+', line, pos);
+        lcd_write_number(number, size, line, pos + 1);
+    }
+    else{
+        lcd_write_char('-', 3, pos);
+        lcd_write_number(number * -1, size, line, pos + 1);    
+	}
+}

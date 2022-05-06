@@ -12,4 +12,6 @@ void display_init();
 
 void lcd_write_char(const char pointer, uint8_t line, uint8_t pos);
 
+void lcd_signed_number(int16_t number, uint8_t size, uint8_t line, uint8_t pos);
+
 #endif /* __LCD_H */

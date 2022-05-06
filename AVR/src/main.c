@@ -205,6 +205,27 @@ uint16_t ui_digit_set(uint16_t old_value, int8_t ticks, uint8_t digits, uint16_t
     return new_value;
 }
 
+// function that allows user to set all digits in a parameter
+int16_t ui_signed_digit_set(int16_t old_value, int8_t ticks, uint8_t digits, int16_t min, int16_t max){
+    int16_t unlimited = (int16_t)old_value;
+    int16_t new_value = old_value;
+
+    if(ticks != 0){
+        unlimited += (int16_t)ticks;
+        if(unlimited >= (int16_t)min){
+            if(unlimited <= (int16_t)max)
+                new_value = (uint16_t)unlimited;
+            else
+                new_value = max;
+        }
+        else
+            new_value = min;
+
+        lcd_signed_number(new_value, digits, 3, DIGIT_POS - digits - 1);
+    }
+    return new_value;
+}
+
 uint8_t ui_text_set(uint8_t old_value, int8_t ticks, TEXTS text_type){
     int8_t unlimited = (int8_t)old_value;
     uint8_t new_value = old_value;
@@ -536,7 +557,7 @@ void loop(){
     0 ... (4 * 12) = 48
     */
     static uint8_t oct_trans = 2; // 2 * 12
-    static uint8_t note_trans = 0; // 2 * 12
+    //static int8_t note_trans = 0; // -12 ... 12
     static uint8_t mixer1 = 50; // mixer's first channel
     static uint8_t mixer2 = 50; // mixer's second channel
 
@@ -544,8 +565,8 @@ void loop(){
     static uint8_t osc1_osc_count = 0; // 0 ... 5(?)
     //static SO_MODE osc1_osc_mode = harmonic;              all sub oscillators are harmonic
     //static uint8_t osc1_osc_unison = 0; // 0 ... 100
-    static uint8_t osc1_trans = 0;  // transpose -24 ... 24
-    static uint8_t osc1_cent = 0;   // 0 ... 100
+    static int8_t osc1_trans = 0;  // transpose -24 ... 24
+    static int8_t osc1_cent = 0;   // -99 ... 99
     static MODIFIER osc1_trans_mod = none; // modifier for osc trans
     static MODIFIER osc1_cent_mod = none;  // modifier for osc cent
 
@@ -553,10 +574,10 @@ void loop(){
     static uint8_t osc2_osc_count = 0; // 0 ... 5(?)
     //static SO_MODE osc2_osc_mode = harmonic;              all sub oscillators are harmonic
     //static uint8_t osc2_osc_unison = 0; // 0 ... 100
-    static uint8_t osc2_trans = 0;  // transpose -24 ... 24
-    static uint8_t osc2_cent = 0;   // 0 ... 100
-    static MODIFIER osc2_trans_mod = none; // modifier for osc trans
-    static MODIFIER osc2_cent_mod = none;  // modifier for osc cent
+    //static int8_t osc2_trans = 0;  // transpose -24 ... 24
+    //static int8_t osc2_cent = 0;   // -99 ... 99
+    //static MODIFIER osc2_trans_mod = none; // modifier for osc trans
+    //static MODIFIER osc2_cent_mod = none;  // modifier for osc cent
 
     /* in case one day OSC 3 is implemented
     static SHAPE osc3_shape = sinusoid;
@@ -731,8 +752,8 @@ void loop(){
         }
         break;
     */
-    case 2: // Keybed offset config
-        lcd_write_string("01 Keybed offset config  ~", 26, 0, 0);
+    case 2: // Keyboard offset config
+        lcd_write_string("01 Keyboard config       ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -961,6 +982,7 @@ void loop(){
             break;
         }
         break;
+    
     }
 
     {}
@@ -1067,9 +1089,9 @@ void loop(){
     {}
 
 
-    { // Keybed offset config
+    { // Keyboard offset config
     case 50:
-        lcd_write_string("00 Octave                ~", 26, 2, 0);
+        lcd_write_string("00 Octave                 ", 26, 2, 0);
         oct_trans = ui_digit_set(oct_trans, encoder_rotation, 2, 0, 4);
         transmit_on_change(114, oct_trans, 1);
         switch(button_pressed){
@@ -1081,8 +1103,10 @@ void loop(){
         case 3:
             break;
         case 4:
+            /* only 61 oscillators
             change_submenu(51);
-            lcd_write_number(note_trans, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(note_trans, 2, 3, DIGIT_POS - 3);
+            */
             break;
         case 5:
             break;
@@ -1090,10 +1114,11 @@ void loop(){
             break;
         }
         break;
+    /* only 61 oscillators
     case 51:
         lcd_write_string("01 Transpose              ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        note_trans = ui_digit_set(note_trans, encoder_rotation, 2, 0, 12);
+        note_trans = ui_signed_digit_set(note_trans, encoder_rotation, 2, -12, 12);
         transmit_on_change(115, note_trans, 1);
         switch(button_pressed){
         case 1:
@@ -1113,6 +1138,7 @@ void loop(){
             break;
         }
         break;
+    */
     }
 
     {}
@@ -1253,7 +1279,7 @@ void loop(){
             break;
         case 4:
             change_submenu(75);
-            lcd_write_number(osc1_trans, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_trans, 2, 3, DIGIT_POS - 3);
             break;
         case 5:
             change_submenu(71);
@@ -1315,7 +1341,7 @@ void loop(){
     case 75:
         lcd_write_string("05 Transpose             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        osc1_trans = ui_digit_set(osc1_trans, encoder_rotation, 2, 0, MAXTRANS);
+        osc1_trans = ui_signed_digit_set(osc1_trans, encoder_rotation, 2, -MAXTRANS / 2, MAXTRANS / 2);
         transmit_on_change(124, osc1_trans, 1);
         switch(button_pressed){
         case 1:
@@ -1327,7 +1353,7 @@ void loop(){
             break;
         case 4:
             change_submenu(76);
-            lcd_write_number(osc1_cent, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_cent, 2, 3, DIGIT_POS - 3);
             break;
         case 5:
             change_submenu(72);
@@ -1340,7 +1366,7 @@ void loop(){
     case 76:
         lcd_write_string("06 Cent variation        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        osc1_cent = ui_digit_set(osc1_cent, encoder_rotation, 2, 0, 100);
+        osc1_cent = ui_signed_digit_set(osc1_cent, encoder_rotation, 2, -99, 99);
         transmit_on_change(125, osc1_cent, 1);
         switch(button_pressed){
         case 1:
@@ -1356,7 +1382,7 @@ void loop(){
             break;
         case 5:
             change_submenu(75);
-            lcd_write_number(osc1_trans, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_trans, 2, 3, DIGIT_POS - 3);
             break;
         default:
             break;
@@ -1386,7 +1412,7 @@ void loop(){
             break;
         case 5:
             change_submenu(76);
-            lcd_write_number(osc1_cent, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_cent, 2, 3, DIGIT_POS - 3);
             break;
         default:
             break;
@@ -1395,7 +1421,7 @@ void loop(){
     case 78:
         lcd_write_string("08 Cent control           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        modification = ui_text_set(osc1_trans_mod, encoder_rotation, modifier_t);
+        modification = ui_text_set(osc1_cent_mod, encoder_rotation, modifier_t);
         if(modification != osc1_cent_mod){
             modifier_allocation[osc1_cent_mod]--;
             modifier_allocation[modification]++;
@@ -1486,7 +1512,7 @@ void loop(){
             break;
         case 4:
             change_submenu(95);
-            lcd_write_number(osc2_trans, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_trans, 2, 3, DIGIT_POS - 3);
             break;
         case 5:
             change_submenu(91);
@@ -1545,8 +1571,10 @@ void loop(){
     case 95:
         lcd_write_string("05 Transpose             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        osc2_trans = ui_digit_set(osc2_trans, encoder_rotation, 2, 0, MAXTRANS);
+        /* only 61 oscillators
+        osc2_trans = ui_signed_digit_set(osc2_trans, encoder_rotation, 2, -MAXTRANS / 2, MAXTRANS / 2);
         transmit_on_change(134, osc2_trans, 1);
+        */
         switch(button_pressed){
         case 1:
             //reak;
@@ -1557,11 +1585,11 @@ void loop(){
             break;
         case 4:
             change_submenu(96);
-            lcd_write_number(osc2_cent, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_cent, 2, 3, DIGIT_POS - 3);
             break;
         case 5:
             change_submenu(92);
-            lcd_write_number(osc2_osc_count, 2, 3, DIGIT_POS - 2);
+            lcd_write_number(osc1_osc_count, 2, 3, DIGIT_POS - 2);
             break;
         default:
             break;
@@ -1570,8 +1598,10 @@ void loop(){
     case 96:
         lcd_write_string("06 Cent variation        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        osc2_cent = ui_digit_set(osc2_cent, encoder_rotation, 2, 0, 100);
+        /* only 61 oscillators
+        osc2_cent = ui_signed_digit_set(osc2_cent, encoder_rotation, 2, -99, 99);
         transmit_on_change(135, osc2_cent, 1);
+        */
         switch(button_pressed){
         case 1:
             //break;
@@ -1582,11 +1612,11 @@ void loop(){
             break;
         case 4:
             change_submenu(97);
-            lcd_write_string(MODIFIER_TEXT[osc2_trans_mod], 26, 3, 0);
+            lcd_write_string(MODIFIER_TEXT[osc1_trans_mod], 26, 3, 0);
             break;
         case 5:
             change_submenu(95);
-            lcd_write_number(osc2_trans, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_trans, 2, 3, DIGIT_POS - 3);
             break;
         default:
             break;
@@ -1595,6 +1625,7 @@ void loop(){
     case 97:
         lcd_write_string("07 Transpose control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
+        /* only 61 oscillators
         modification = ui_text_set(osc2_trans_mod, encoder_rotation, modifier_t);
         if(modification != osc2_trans_mod){
             modifier_allocation[osc2_trans_mod]--;
@@ -1602,6 +1633,7 @@ void loop(){
             osc2_trans_mod = modification;
         }
         transmit_on_change(136, osc2_trans_mod, 1);
+        */
         switch(button_pressed){
         case 1:
             //break;
@@ -1612,11 +1644,11 @@ void loop(){
             break;
         case 4:
             change_submenu(98);
-            lcd_write_string(MODIFIER_TEXT[osc2_cent_mod], 26, 3, 0);
+            lcd_write_string(MODIFIER_TEXT[osc1_cent_mod], 26, 3, 0);
             break;
         case 5:
             change_submenu(96);
-            lcd_write_number(osc2_cent, 2, 3, DIGIT_POS - 2);
+            lcd_signed_number(osc1_cent, 2, 3, DIGIT_POS - 3);
             break;
         default:
             break;
@@ -1625,6 +1657,7 @@ void loop(){
     case 98:
         lcd_write_string("08 Cent control           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
+        /* only 61 oscillators
         modification = ui_text_set(osc2_cent_mod, encoder_rotation, modifier_t);
         if(modification != osc2_cent_mod){
             modifier_allocation[osc2_cent_mod]--;
@@ -1632,12 +1665,12 @@ void loop(){
             osc2_cent_mod = modification;
         }
         transmit_on_change(137, osc2_cent_mod, 1);
+        */
         switch(button_pressed){
         case 1:
             //break;
         case 2:
-            lcd_write_string("                          ", 26, 2, 0);
-            menu_state = 5;
+            change_submenu(5);
             break;
         case 3:
             break;
@@ -1645,7 +1678,7 @@ void loop(){
             break;
         case 5:
             change_submenu(97);
-            lcd_write_string(MODIFIER_TEXT[osc2_trans_mod], 26, 3, 0);
+            lcd_write_string(MODIFIER_TEXT[osc1_trans_mod], 26, 3, 0);
             break;
         default:
             break;
