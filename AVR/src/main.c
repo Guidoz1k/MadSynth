@@ -96,6 +96,7 @@ char STATE_TEXT[2][26] = {
     " Off                      ",
     " On                       "
 };
+uint8_t skip_button = 0;
 // ============================================================ accessory functions
 
 void ui_pip_label(void){
@@ -189,7 +190,7 @@ uint16_t ui_digit_set(uint16_t old_value, int8_t ticks, uint8_t digits, uint16_t
     int16_t unlimited = (int16_t)old_value;
     uint16_t new_value = old_value;
 
-    if(ticks != 0){
+    if((ticks != 0) || (skip_button == 1)){
         unlimited += (int16_t)ticks;
         if(unlimited >= (int16_t)min){
             if(unlimited <= (int16_t)max)
@@ -201,6 +202,7 @@ uint16_t ui_digit_set(uint16_t old_value, int8_t ticks, uint8_t digits, uint16_t
             new_value = min;
 
         lcd_write_number(new_value, digits, 3, DIGIT_POS - digits);
+        skip_button = 0;
     }
     return new_value;
 }
@@ -340,7 +342,7 @@ void change_submenu(uint8_t submenu){
     menu_state = submenu;
 }
 
-void transmit_on_change(uint16_t code, uint8_t message, uint8_t size){
+void transmit_on_change(uint8_t code, uint16_t message, uint8_t size){
     static uint16_t old_value = 0xFF;
     static uint8_t old_state = 0;
 
@@ -502,7 +504,7 @@ void loop(){
     uint8_t modification = 0;
 
     uint8_t button_pressed = 0;     // records the value of the button each iteration
-    uint8_t encoder_rotation = 0;   // records the value of the accumulated encoder rotations
+    static uint8_t encoder_rotation = 0;   // records the value of the accumulated encoder rotations
     static uint8_t button_hold = 0; // counter to limit the button interaction
 
     typedef enum _mod{
@@ -593,8 +595,8 @@ void loop(){
     static uint16_t adsr_a = 0;    // 0 ... 10000 ms
     static uint16_t adsr_d = 0;    // 0 ... 10000 ms
     static uint16_t adsr_s = 0;    // 0 ... 10000 ms
-    static uint16_t adsr_sl = 0;   // 0 ... 100%
-    static uint16_t adsr_r = 1;    // 1 ... 10000 ms
+    static uint16_t adsr_sl = 128;   // 0 ... 100%
+    static uint16_t adsr_r = 0;    // 1 ... 10000 ms
     static MODIFIER adsr_a_mod = none;    // modifier for adsr A parameter
     static MODIFIER adsr_d_mod = none;    // modifier for adsr D parameter
     static MODIFIER adsr_s_mod = none;    // modifier for adsr S parameter
@@ -638,7 +640,7 @@ void loop(){
     static uint16_t me_d = 0;       // 0 ... 10000 ms
     static uint16_t me_s = 0;       // 0 ... 10000 ms
     static uint16_t me_sl = 0;      // 0 ... 100%
-    static uint16_t me_r = 1;       // 1 ... 10000 ms
+    static uint16_t me_r = 0;       // 1 ... 10000 ms
     static MODIFIER me_a_mod = none;    // modifier for MOD ENV A parameter
     static MODIFIER me_d_mod = none;    // modifier for MOD ENV D parameter
     static MODIFIER me_s_mod = none;    // modifier for MOD ENV S parameter
@@ -646,11 +648,11 @@ void loop(){
     static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
 
     // low-pass filter variables
-    //static STATE filter_state = off_t;
-    //static uint16_t cutoff_freq = 0;
+    static STATE filter_state = off_t;
+    static uint16_t cutoff_freq = 10000;
 
     // reverb effect variables
-    // SOCORR
+    //static STATE reverb_state = off_t;
 
     // key state machine to serial routine
     for(i = 0; i < (MAXKEYS / 2); i++){
@@ -961,7 +963,7 @@ void loop(){
         }
         break;
     case 11: // Modifier Envelope controls
-        lcd_write_string("10 MOD ENV controls       ", 26, 0, 0);
+        lcd_write_string("10 MOD ENV controls      ~", 26, 0, 0);
         lcd_write_char(127, 0, 24);
         switch(button_pressed){
         case 1:
@@ -974,9 +976,55 @@ void loop(){
             menu_state = 180;
             break;
         case 4:
+            menu_state = 12;
             break;
         case 5:
             menu_state = 10;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 12: // Modifier Envelope controls
+        lcd_write_string("11 Low-Pass Filter       ~", 26, 0, 0);
+        lcd_write_char(127, 0, 24);
+        switch(button_pressed){
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            lcd_write_string("  ", 26, 0, 24);
+            lcd_write_string(STATE_TEXT[filter_state], 26, 3, 0);
+            menu_state = 200;
+            break;
+        case 4:
+            menu_state = 13;
+            break;
+        case 5:
+            menu_state = 11;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 13: // Modifier Envelope controls
+        lcd_write_string("12 REVERBERATOR         X ", 26, 0, 0);
+        lcd_write_char(127, 0, 24);
+        switch(button_pressed){
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            //lcd_write_string("  ", 26, 0, 24);
+            //lcd_write_string(STATE_TEXT[reverb_state], 26, 3, 0);
+            //menu_state = 210;
+            break;
+        case 4:
+            break;
+        case 5:
+            menu_state = 12;
             break;
         default:
             break;
@@ -1167,8 +1215,7 @@ void loop(){
         break;
     */
     case 61:
-        lcd_write_string("01 Oscillator 1          ~", 26, 2, 0);
-        lcd_write_char(127, 2, 24);
+        lcd_write_string("00 Oscillator 1          ~", 26, 2, 0);
         mixer1 = ui_digit_set(mixer1, encoder_rotation, 2, 0, 99);
         transmit_on_change(116, mixer1, 1);
         switch(button_pressed){
@@ -1191,7 +1238,7 @@ void loop(){
         }
         break;
     case 62:
-        lcd_write_string("02 Oscillator 2           ", 26, 2, 0);
+        lcd_write_string("01 Oscillator 2           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         mixer2 = ui_digit_set(mixer2, encoder_rotation, 2, 0, 99);
         transmit_on_change(117, mixer2, 1);
@@ -1241,7 +1288,7 @@ void loop(){
         break;
     */
     case 71:
-        lcd_write_string("01 Shape                 ~", 26, 2, 0);
+        lcd_write_string("00 Shape                 ~", 26, 2, 0);
         //lcd_write_char(127, 2, 24);
         osc1_shape = ui_text_set(osc1_shape, encoder_rotation, shape_t);
         transmit_on_change(120, osc1_shape, 1);
@@ -1265,7 +1312,7 @@ void loop(){
         }
         break;
     case 72:
-        lcd_write_string("02 Sub-oscillators       ~", 26, 2, 0);
+        lcd_write_string("01 Sub-oscillators       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_osc_count  = ui_digit_set(osc1_osc_count, encoder_rotation, 2, 0, MAXSVOICES);
         transmit_on_change(121, osc1_osc_count, 1);
@@ -1339,7 +1386,7 @@ void loop(){
         break;
     */
     case 75:
-        lcd_write_string("05 Transpose             ~", 26, 2, 0);
+        lcd_write_string("02 Transpose             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_trans = ui_signed_digit_set(osc1_trans, encoder_rotation, 2, -MAXTRANS / 2, MAXTRANS / 2);
         transmit_on_change(124, osc1_trans, 1);
@@ -1364,7 +1411,7 @@ void loop(){
         }
         break;
     case 76:
-        lcd_write_string("06 Cent variation        ~", 26, 2, 0);
+        lcd_write_string("03 Cent variation        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc1_cent = ui_signed_digit_set(osc1_cent, encoder_rotation, 2, -99, 99);
         transmit_on_change(125, osc1_cent, 1);
@@ -1389,7 +1436,7 @@ void loop(){
         }
         break;
     case 77:
-        lcd_write_string("07 Transpose control     ~", 26, 2, 0);
+        lcd_write_string("04 Transpose control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(osc1_trans_mod, encoder_rotation, modifier_t);
         if(modification != osc1_trans_mod){
@@ -1419,7 +1466,7 @@ void loop(){
         }
         break;
     case 78:
-        lcd_write_string("08 Cent control           ", 26, 2, 0);
+        lcd_write_string("05 Cent control           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(osc1_cent_mod, encoder_rotation, modifier_t);
         if(modification != osc1_cent_mod){
@@ -1474,7 +1521,7 @@ void loop(){
         break;
     */
     case 91:
-        lcd_write_string("01 Shape                 ~", 26, 2, 0);
+        lcd_write_string("00 Shape                 ~", 26, 2, 0);
         //lcd_write_char(127, 2, 24);
         osc2_shape = ui_text_set(osc2_shape, encoder_rotation, shape_t);
         transmit_on_change(130, osc2_shape, 1);
@@ -1498,7 +1545,7 @@ void loop(){
         }
         break;
     case 92:
-        lcd_write_string("02 Sub-oscillators       ~", 26, 2, 0);
+        lcd_write_string("01 Sub-oscillators       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         osc2_osc_count = ui_digit_set(osc2_osc_count, encoder_rotation, 2, 0, MAXSVOICES);
         transmit_on_change(131, osc2_osc_count, 1);
@@ -1569,7 +1616,7 @@ void loop(){
         break;
     */
     case 95:
-        lcd_write_string("05 Transpose             ~", 26, 2, 0);
+        lcd_write_string("02 Transpose             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         /* only 61 oscillators
         osc2_trans = ui_signed_digit_set(osc2_trans, encoder_rotation, 2, -MAXTRANS / 2, MAXTRANS / 2);
@@ -1596,7 +1643,7 @@ void loop(){
         }
         break;
     case 96:
-        lcd_write_string("06 Cent variation        ~", 26, 2, 0);
+        lcd_write_string("03 Cent variation        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         /* only 61 oscillators
         osc2_cent = ui_signed_digit_set(osc2_cent, encoder_rotation, 2, -99, 99);
@@ -1623,7 +1670,7 @@ void loop(){
         }
         break;
     case 97:
-        lcd_write_string("07 Transpose control     ~", 26, 2, 0);
+        lcd_write_string("04 Transpose control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         /* only 61 oscillators
         modification = ui_text_set(osc2_trans_mod, encoder_rotation, modifier_t);
@@ -1655,7 +1702,7 @@ void loop(){
         }
         break;
     case 98:
-        lcd_write_string("08 Cent control           ", 26, 2, 0);
+        lcd_write_string("05 Cent control           ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         /* only 61 oscillators
         modification = ui_text_set(osc2_cent_mod, encoder_rotation, modifier_t);
@@ -1712,7 +1759,7 @@ void loop(){
         break;
     */
     case 111:
-        lcd_write_string("01 Attack time           ~", 26, 2, 0);
+        lcd_write_string("00 Attack time           ~", 26, 2, 0);
         //lcd_write_char(127, 2, 24);
         adsr_a = ui_digit_set(adsr_a, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(140, adsr_a, 1);
@@ -1736,7 +1783,7 @@ void loop(){
         }
         break;
     case 112:
-        lcd_write_string("02 Decay time            ~", 26, 2, 0);
+        lcd_write_string("01 Decay time            ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_d = ui_digit_set(adsr_d, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(142, adsr_d, 1);
@@ -1761,9 +1808,9 @@ void loop(){
         }
         break;
     case 113:
-        lcd_write_string("03 Sustain level         ~", 26, 2, 0);
+        lcd_write_string("02 Sustain level         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        adsr_sl = ui_digit_set(adsr_sl, encoder_rotation, 3, 0, 100);
+        adsr_sl = ui_digit_set(adsr_sl, encoder_rotation, 3, 0, 128);
         transmit_on_change(146, adsr_sl, 1);
         switch(button_pressed){
         case 1:
@@ -1786,7 +1833,7 @@ void loop(){
         }
         break;
     case 114:
-        lcd_write_string("04 Sustain time          ~", 26, 2, 0);
+        lcd_write_string("03 Sustain time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         adsr_s = ui_digit_set(adsr_s, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(144, adsr_s, 1);
@@ -1811,9 +1858,9 @@ void loop(){
         }
         break;
     case 115:
-        lcd_write_string("05 Release time          ~", 26, 2, 0);
+        lcd_write_string("04 Release time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        adsr_r = ui_digit_set(adsr_r, encoder_rotation, 3, 1, MAXADSR);
+        adsr_r = ui_digit_set(adsr_r, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(148, adsr_r, 1);
         switch(button_pressed){
         case 1:
@@ -1836,7 +1883,7 @@ void loop(){
         }
         break;
     case 116:
-        lcd_write_string("06 Attack control        ~", 26, 2, 0);
+        lcd_write_string("05 Attack control        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(adsr_a_mod, encoder_rotation, modifier_t);
         if(modification != adsr_a_mod){
@@ -1866,7 +1913,7 @@ void loop(){
         }
         break;
     case 117:
-        lcd_write_string("07 Decay control         ~", 26, 2, 0);
+        lcd_write_string("06 Decay control         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(adsr_d_mod, encoder_rotation, modifier_t);
         if(modification != adsr_d_mod){
@@ -1896,7 +1943,7 @@ void loop(){
         }
         break;
     case 118:
-        lcd_write_string("08 Sustain lvl control   ~", 26, 2, 0);
+        lcd_write_string("07 Sustain lvl control   ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(adsr_sl_mod, encoder_rotation, modifier_t);
         if(modification != adsr_sl_mod){
@@ -1926,7 +1973,7 @@ void loop(){
         }
         break;
     case 119:
-        lcd_write_string("09 Sustain control       ~", 26, 2, 0);
+        lcd_write_string("08 Sustain control       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(adsr_s_mod, encoder_rotation, modifier_t);
         if(modification != adsr_s_mod){
@@ -1956,7 +2003,7 @@ void loop(){
         }
         break;
     case 120:
-        lcd_write_string("10 Release control       ", 26, 2, 0);
+        lcd_write_string("09 Release control       ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(adsr_r_mod, encoder_rotation, modifier_t);
         if(modification != adsr_r_mod){
@@ -2260,7 +2307,7 @@ void loop(){
         break;
     */
     case 152:
-        lcd_write_string("02 Shape                 ~", 26, 2, 0);
+        lcd_write_string("01 Shape                 ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_shape = ui_text_set(lfo1_shape, encoder_rotation, shape_t);
         transmit_on_change(162, lfo1_shape, 1);
@@ -2285,7 +2332,7 @@ void loop(){
         }
         break;
     case 153:
-        lcd_write_string("03 Mode                  ~", 26, 2, 0);
+        lcd_write_string("02 Mode                  ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_mode = ui_text_set(lfo1_mode, encoder_rotation, oscm_t);
         transmit_on_change(161, lfo1_mode, 1);
@@ -2310,7 +2357,7 @@ void loop(){
         }
         break;
     case 154:
-        lcd_write_string("04 Amplitude             ~", 26, 2, 0);
+        lcd_write_string("03 Amplitude             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_amp = ui_digit_set(lfo1_amp, encoder_rotation, 2, 1, 99);
         transmit_on_change(163, lfo1_amp, 1);
@@ -2335,7 +2382,7 @@ void loop(){
         }
         break;
     case 155:
-        lcd_write_string("05 Frequency             ~", 26, 2, 0);
+        lcd_write_string("04 Frequency             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo1_freq = ui_digit_set(lfo1_freq, encoder_rotation, 3, 1, 250);
         transmit_on_change(164, lfo1_freq, 1);
@@ -2360,7 +2407,7 @@ void loop(){
         }
         break;
     case 156:
-        lcd_write_string("06 Amplitude control     ~", 26, 2, 0);
+        lcd_write_string("05 Amplitude control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(lfo1_amp_mod, encoder_rotation, modifier_t);
         if(modification != lfo1_amp_mod){
@@ -2390,7 +2437,7 @@ void loop(){
         }
         break;
     case 157:
-        lcd_write_string("07 Frequency control      ", 26, 2, 0);
+        lcd_write_string("06 Frequency control      ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(lfo1_freq_mod, encoder_rotation, modifier_t);
         if(modification != lfo1_freq_mod){
@@ -2469,7 +2516,7 @@ void loop(){
         break;
     */
     case 162:
-        lcd_write_string("02 Shape                 ~", 26, 2, 0);
+        lcd_write_string("01 Shape                 ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_shape = ui_text_set(lfo2_shape, encoder_rotation, shape_t);
         transmit_on_change(172, lfo2_shape, 1);
@@ -2494,7 +2541,7 @@ void loop(){
         }
         break;
     case 163:
-        lcd_write_string("03 Mode                  ~", 26, 2, 0);
+        lcd_write_string("02 Mode                  ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_mode = ui_text_set(lfo2_mode, encoder_rotation, oscm_t);
         transmit_on_change(171, lfo2_mode, 1);
@@ -2519,7 +2566,7 @@ void loop(){
         }
         break;
     case 164:
-        lcd_write_string("04 Amplitude             ~", 26, 2, 0);
+        lcd_write_string("03 Amplitude             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_amp = ui_digit_set(lfo2_amp, encoder_rotation, 2, 1, 99);
         transmit_on_change(173, lfo2_amp, 1);
@@ -2544,7 +2591,7 @@ void loop(){
         }
         break;
     case 165:
-        lcd_write_string("05 Frequency             ~", 26, 2, 0);
+        lcd_write_string("04 Frequency             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         lfo2_freq = ui_digit_set(lfo2_freq, encoder_rotation, 3, 1, 250);
         transmit_on_change(174, lfo2_freq, 1);
@@ -2569,7 +2616,7 @@ void loop(){
         }
         break;
     case 166:
-        lcd_write_string("06 Amplitude control     ~", 26, 2, 0);
+        lcd_write_string("05 Amplitude control     ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(lfo2_amp_mod, encoder_rotation, modifier_t);
         if(modification != lfo2_amp_mod){
@@ -2599,7 +2646,7 @@ void loop(){
         }
         break;
     case 167:
-        lcd_write_string("07 Frequency control      ", 26, 2, 0);
+        lcd_write_string("06 Frequency control      ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(lfo2_freq_mod, encoder_rotation, modifier_t);
         if(modification != lfo2_freq_mod){
@@ -2733,7 +2780,7 @@ void loop(){
         break;
     */
     case 182:
-        lcd_write_string("02 Attack time           ~", 26, 2, 0);
+        lcd_write_string("01 Attack time           ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_a = ui_digit_set(me_a, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(200, me_a, 1);
@@ -2758,7 +2805,7 @@ void loop(){
         }
         break;
     case 183:
-        lcd_write_string("03 Decay time            ~", 26, 2, 0);
+        lcd_write_string("02 Decay time            ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_d = ui_digit_set(me_d, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(202, me_d, 1);
@@ -2783,7 +2830,7 @@ void loop(){
         }
         break;
     case 184:
-        lcd_write_string("04 Sustain level         ~", 26, 2, 0);
+        lcd_write_string("03 Sustain level         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_sl = ui_digit_set(me_sl, encoder_rotation, 3, 0, 100);
         transmit_on_change(206, me_sl, 1);
@@ -2808,7 +2855,7 @@ void loop(){
         }
         break;
     case 185:
-        lcd_write_string("05 Sustain time          ~", 26, 2, 0);
+        lcd_write_string("04 Sustain time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_s = ui_digit_set(me_s, encoder_rotation, 3, 0, MAXADSR);
         transmit_on_change(204, me_s, 1);
@@ -2833,7 +2880,7 @@ void loop(){
         }
         break;
     case 186:
-        lcd_write_string("06 Release time          ~", 26, 2, 0);
+        lcd_write_string("05 Release time          ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         me_r = ui_digit_set(me_r, encoder_rotation, 3, 1, MAXADSR);
         transmit_on_change(208, me_r, 1);
@@ -2858,7 +2905,7 @@ void loop(){
         }
         break;
     case 187:
-        lcd_write_string("07 Attack control        ~", 26, 2, 0);
+        lcd_write_string("06 Attack control        ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_a_mod, encoder_rotation, modifier_t);
         if(modification != me_a_mod){
@@ -2888,7 +2935,7 @@ void loop(){
         }
         break;
     case 188:
-        lcd_write_string("08 Decay control         ~", 26, 2, 0);
+        lcd_write_string("07 Decay control         ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_d_mod, encoder_rotation, modifier_t);
         if(modification != me_d_mod){
@@ -2918,7 +2965,7 @@ void loop(){
         }
         break;
     case 189:
-        lcd_write_string("09 Sustain lvl control   ~", 26, 2, 0);
+        lcd_write_string("08 Sustain lvl control   ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_sl_mod, encoder_rotation, modifier_t);
         if(modification != me_sl_mod){
@@ -2948,7 +2995,7 @@ void loop(){
         }
         break;
     case 190:
-        lcd_write_string("10 Sustain control       ~", 26, 2, 0);
+        lcd_write_string("09 Sustain control       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_s_mod, encoder_rotation, modifier_t);
         if(modification != me_s_mod){
@@ -2978,7 +3025,7 @@ void loop(){
         }
         break;
     case 191:
-        lcd_write_string("11 Release control       ", 26, 2, 0);
+        lcd_write_string("10 Release control       ", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_r_mod, encoder_rotation, modifier_t);
         if(modification != me_r_mod){
@@ -3000,6 +3047,64 @@ void loop(){
         case 5:
             change_submenu(190);
             lcd_write_string(MODIFIER_TEXT[me_s_mod], 26, 3, 0);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+
+    {}
+
+    { // Low-Pass Filter
+    case 200:
+        lcd_write_string("00 LPF State             ~", 26, 2, 0);
+        filter_state = ui_text_set(filter_state, encoder_rotation, state_t);
+        transmit_on_change(220, filter_state, 1);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            change_submenu(12);
+            break;
+        case 3:
+            break;
+        case 4:
+            change_submenu(201);
+            lcd_write_number(cutoff_freq, 5, 3, DIGIT_POS - 5);
+            break;
+        case 5:
+            //change_submenu(60);
+            break;
+        default:
+            break;
+        }
+        break;
+    case 201:
+        lcd_write_string("01 Cut-off Frequency      ", 26, 2, 0);
+        lcd_write_char(127, 2, 24);
+        cutoff_freq = ui_digit_set(cutoff_freq, encoder_rotation, 5, 1, 10000);
+        transmit_on_change(221, cutoff_freq, 2);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            change_submenu(12);
+            break;
+        case 3:
+            if(cutoff_freq > 1000)
+                cutoff_freq = cutoff_freq - 1000;
+            else{
+                cutoff_freq %= 1000;
+                cutoff_freq += 19000;
+            }
+            skip_button = 1;
+            break;
+        case 4:
+            break;
+        case 5:
+            change_submenu(200);
+            lcd_write_string(STATE_TEXT[filter_state], 26, 3, 0);
             break;
         default:
             break;

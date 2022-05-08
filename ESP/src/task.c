@@ -720,11 +720,20 @@ int16_t lut_r[LUTSIZE] = {
 
 volatile uint_fast32_t increment[VOICEM] = {0};    // 52.2 * freq
 volatile uint_fast32_t counter[VOICEM] = {0};      // position in LUT
+/* channel allocation
+    0 - unallocated
+    1 - A
+    2 - D
+    3 - S
+    4 - off by user
+    5 - R
+    6 - off by DDS
+*/
 volatile uint_fast8_t channel_alloc[VOICEM] = {0};
 
 uint_fast32_t bobMax = LUTSIZE << 10;
 uint_fast8_t voice_counter = 0;       // 0 - VOICEM number of voices
-uint32_t keys_freq[13 + 108 + 13] = {
+const uint32_t keys_freq[13 + 108 + 13] = {
     BROKELF,
     BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,
     164,    173,    184,    194,    206,    218,    231,    245,    260,    275,    291,    309,
@@ -738,6 +747,16 @@ uint32_t keys_freq[13 + 108 + 13] = {
     41860,  44349,  46986,  49780,  52740,  55877,  59109,  62719,  66449,  70400,  74586,  79021,
     BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,
     BROKEHF,
+};
+const uint8_t agm[VOICEM] = {
+    0,
+    7, 7, 7, 7,
+    6, 6, 6, 6,
+    5, 5, 5, 5, 
+    4, 4, 4,
+    3, 3, 3, 3, 3,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
 int_fast8_t master_volume = 50;
@@ -763,14 +782,26 @@ uint16_t harm_atten[5][16] = {
     {1000,   666,   545,   480,   437,   408,   385,   367,   353,   341,   331,   322,   314,   307,   301,  295}, // inverted sawtooth
 };
 
-
 // low-pass filter variables
-//uint8_t filter_state = 0;
-//int32_t cutoff_freq = 1000; // variavel real
-//float   filter_alpha = 0;
-//int32_t filter_factor = 10000;
-//int32_t inp_factor = 0;
-//int32_t out_factor = 0;
+uint8_t filter_state = 0;
+int32_t cutoff_freq = 10000; // variavel real
+int32_t filter_alpha = 0;
+int32_t filter_factor = 10000;
+int32_t inp_factor = 0;
+int32_t out_factor = 0;
+
+// reverb fx variables
+uint8_t reverb_state = 0;
+
+// ADSR variables
+uint16_t a_timer = 0;
+uint16_t d_timer = 0;
+uint16_t s_level = 128;
+uint16_t s_timer = 0;
+uint16_t r_timer = 0;
+uint16_t adsr_counter[VOICEM] = {0};
+uint16_t adsr_vca[VOICEM] = {0}; // 0 - 128
+uint16_t adsr_crop = 0;
 
 // DDS control variables
 /*
@@ -796,48 +827,11 @@ typedef enum _shape{
     sawtooth = 3,
     inv_sawtooth = 4
 } SHAPE;
-typedef enum _oscm{
-    frees = 0,
-    retriggers = 1
-} O_MODE;
-
 typedef enum _state{
     off_t = 0,
     on_t = 1
 } STATE;
 
-static uint8_t main_volume = 50;  // 0 ... 99
-static enum _stereo{
-    l_r,
-    l_only,
-    r_only
-} stereo = l_r;
-
-static uint8_t osc_count_limit = 61;
-static uint8_t max_osc_mode = frees;
-
-// oct_trans - piano has 9 octaves, our synth has 5, it starts at the second already - 0 ... (4 * 12) = 48
-static uint8_t mixer1 = 50; // mixer's first channel
-static uint8_t mixer2 = 50; // mixer's second channel
-
-
-static SHAPE osc1_shape = sinusoid;
-static uint8_t osc1_osc_count = 0; // 0 ... 5(?)
-//static SO_MODE osc1_osc_mode = harmonic;              all sub oscillators are harmonic
-//static uint8_t osc1_osc_unison = 0; // 0 ... 100
-static int8_t osc1_trans = 0;  // transpose -24 ... 24
-static int8_t osc1_cent = 0;   // 0 ... 100
-static MODIFIER osc1_trans_mod = none; // modifier for osc trans
-static MODIFIER osc1_cent_mod = none;  // modifier for osc cent
-
-static SHAPE osc2_shape = sinusoid;
-static uint8_t osc2_osc_count = 0; // 0 ... 5(?)
-//static SO_MODE osc2_osc_mode = harmonic;              all sub oscillators are harmonic
-//static uint8_t osc2_osc_unison = 0; // 0 ... 100
-static int8_t osc2_trans = 0;  // transpose -24 ... 24
-static int8_t osc2_cent = 0;   // 0 ... 100
-static MODIFIER osc2_trans_mod = none; // modifier for osc trans
-static MODIFIER osc2_cent_mod = none;  // modifier for osc cent
 
 static uint16_t adsr_a = 0;    // 0 ... 10000 ms
 static uint16_t adsr_d = 0;    // 0 ... 10000 ms
@@ -892,6 +886,19 @@ static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
 
 // ============================================================ TASK 0 FUNCTIONS
 
+void adjust_filter(int32_t new_freq, uint8_t byte){
+    if(byte == 0)
+        cutoff_freq = new_freq;
+    else
+        if(byte == 1){
+        cutoff_freq |= new_freq << 8;
+        filter_alpha = (filter_factor * (2 * PI * cutoff_freq)) / 40000;
+        inp_factor = ((filter_factor * filter_alpha) / (filter_factor + filter_alpha));
+        out_factor = ((filter_factor * filter_factor) / (filter_factor + filter_alpha));
+        }
+
+}
+
 void update_tune(void){
     key_tune = 13 + (12 * oct_trans) + note_trans;
 }
@@ -904,7 +911,7 @@ void set_frequency(uint32_t frequency, uint16_t number){
     counter[number] = 0;
     increment[number] = 256 * frequency / 50;
     channel_alloc[number] = 1;
-    voice_counter++;  
+    adsr_counter[number] = 0;
 }
 
 void change_shape(uint8_t channel, uint8_t shape, uint8_t sub_socs){
@@ -982,10 +989,9 @@ void set_voice(uint8_t key){
 }
 
 void remove_voice(uint16_t number){
-    channel_alloc[number] = 2;
+    if((channel_alloc[number] < 4) && (channel_alloc[number] != 0))
+        channel_alloc[number] = 4;
 }
-
-
 
 // ============================================================ TASK 1 FUNCTIONS
 
@@ -993,6 +999,7 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
     uint8_t aux;
 
     switch(uart_code){
+    { // main codes
     case 110:
         master_volume = uart_message;
         break;
@@ -1003,7 +1010,7 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         oct_trans = uart_message;
         update_tune();
         for(aux = 0; aux < VOICEM; aux++)
-            if(channel_alloc[aux] == 1)
+            if(channel_alloc[aux] != 0)
                 change_voice(aux);
         break;
     case 116:
@@ -1022,14 +1029,14 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         note_trans = uart_message;
         update_tune();
         for(aux = 0; aux < VOICEM; aux++)
-            if(channel_alloc[aux] == 1)
+            if(channel_alloc[aux] != 0)
                 change_voice(aux);
         break;
     case 125:
         note_cent = (int8_t)uart_message;
         update_tune();
         for(aux = 0; aux < VOICEM; aux++)
-            if(channel_alloc[aux] == 1)
+            if(channel_alloc[aux] != 0)
                 change_voice(aux);
         break;
     case 130:
@@ -1038,6 +1045,38 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
     case 131:
         change_shape(2, shape2, uart_message);
         break;
+    }
+
+    { // ADSR
+    case 140:
+        a_timer = uart_message;
+        break;
+    case 142:
+        d_timer = uart_message;
+        break;
+    case 144:
+        s_timer = uart_message;
+        break;
+    case 146:
+        s_level = uart_message;
+        break;
+    case 148:
+        r_timer = uart_message;
+        break;
+    }
+
+    { // LPF
+    case 220:
+        filter_state = uart_message;
+        break;
+    case 221:
+        adjust_filter(uart_message, 0);
+        break;
+    case 222:
+        adjust_filter(uart_message, 1);
+        break;
+    }
+
     default:
         break;
     }
@@ -1068,77 +1107,161 @@ void serial_ops(void){
 
 void task0(void){ // can't use float in ISR
     int_fast16_t out_r = 0, out_l = 0;
+    int_fast16_t master_r = 0, master_l = 0;
+    int_fast16_t mono = 0;
     uint_fast8_t aux = 0;
     uint_fast32_t localCounter = 0;
 
-    //static int_fast32_t filter_l = 0;
-    //static int_fast32_t filter_r = 0;
+    // low-pass filter variables
+    static int_fast32_t filter_l = 0;
+    static int_fast32_t filter_r = 0;
+    int_fast16_t filter_out_r = 0, filter_out_l = 0;
 
+    // reverb variables
+    int_fast16_t reverb_out_r = 0, reverb_out_l = 0;
+
+    // DDS engine
     for(aux = 0; aux < VOICEM; aux++){
         localCounter = counter[aux];
         localCounter += increment[aux];
         if(localCounter >= bobMax){
             localCounter -= bobMax;
-            if(channel_alloc[aux] == 2){
+            if(channel_alloc[aux] == 6){
                 increment[aux] = 0;
                 localCounter = 0;
-                channel_alloc[aux] = 3;
+                channel_alloc[aux] = 0;
             }
         }
-        out_r += lut_r[localCounter >> 10];
-        out_l += lut_l[localCounter >> 10];
+        out_r += (adsr_vca[aux] * lut_r[localCounter >> 10]) >> 7;
+        out_l += (adsr_vca[aux] * lut_l[localCounter >> 10]) >> 7;
         counter[aux] = localCounter;
     }
     out_r *= vca1;
     out_l *= vca2;
 
-    // filter
-    //filter_r = ((out_r * inp_factor)/filter_factor) + ((out_factor * filter_r)/filter_factor);
-    //filter_l = ((out_l * inp_factor)/filter_factor) + ((out_factor * filter_l)/filter_factor);
+    // low-pass filter
+    filter_r = ((inp_factor * out_r)/filter_factor) + ((out_factor * filter_r)/filter_factor);
+    filter_l = ((inp_factor * out_l)/filter_factor) + ((out_factor * filter_l)/filter_factor);
+    if(filter_state == 0){
+        filter_out_r = out_r;
+        filter_out_l = out_l;
+    }
+    else{
+        filter_out_r = filter_r;
+        filter_out_l = filter_l;
+    }
 
+    // reverb fx
+    if(reverb_state == 0){
+        master_r = filter_out_r;
+        master_l = filter_out_l;
+    }
+    else{
+        master_r = reverb_out_r;
+        master_l = reverb_out_l;
+    }
+
+    // stereo config
+    mono = (master_l + master_r) / 2;
     switch(stereo){
     case 0:
-        i2s_output(out_r, out_l);
+        i2s_output(master_r, master_l);
         break;
     case 1:
-        i2s_output(0, (out_l + out_r) / 2);
+        i2s_output(0, mono);
         break;
     case 2:
-        i2s_output((out_l + out_r) / 2, 0);
+        i2s_output(mono, 0);
         break;
     default:
         break;
     }
-    //i2s_output(filter_r, filter_l);
 }
 
 void task1(void){
-    uint8_t aux = 0;
+    uint8_t aux = 24;
 
-
+    // SERIAL IN
     while((serial1_check() / 2) > 0){
         serial_ops();
     }
+
+    voice_counter = 0;
     for(aux = 0; aux < VOICEM; aux++)
-        if(channel_alloc[aux] == 3){
-            increment[aux] = 0;
-            counter[aux] = 0;
-            channel_alloc[aux] = 0;
-            voice_counter--;
-        }
+        if((channel_alloc[aux] != 0) && (channel_alloc[aux] != 6))
+            voice_counter++;
+
+    // AGM
     if(voice_counter == 0){
         vca1 = 0;
         vca2 = 0;
     }
     else{
-        vca1 = ((VOICEM / voice_counter) * (mixer1 * master_volume)) / (100 * 100);
-        vca2 = ((VOICEM / voice_counter) * (mixer2 * master_volume)) / (100 * 100);
+        vca1 = (agm[voice_counter] * mixer1 * master_volume) / (99 * 99);
+        vca2 = (agm[voice_counter] * mixer2 * master_volume) / (99 * 99);
         }
 
-    // ADSR [VOICEM]
+    // ADSR
+    for(aux = 0; aux < VOICEM; aux++){
+        if(channel_alloc[aux] == 0){
+            adsr_counter[aux] = 0;
+            adsr_vca[aux] = 0;
+        }
+        if(channel_alloc[aux] == 1){
+            if(adsr_counter[aux] < a_timer){
+                adsr_counter[aux]++;
+                adsr_vca[aux] = (adsr_counter[aux] * 128) / a_timer;
+            }
+            else{
+                adsr_vca[aux] = 128;
+                adsr_counter[aux] = 0;
+                channel_alloc[aux] = 2;
+            }
+        }
+        if(channel_alloc[aux] == 2){
+            if(adsr_counter[aux] < d_timer){
+                adsr_counter[aux]++;
+                adsr_vca[aux] = 128 - (((128 - s_level) * adsr_counter[aux]) / (d_timer - 1));
+            }
+            else{
+                adsr_counter[aux] = 0;
+                channel_alloc[aux] = 3;
+            }
+        }
+        if(channel_alloc[aux] == 3){
+            adsr_vca[aux] = s_level;
+            adsr_crop = s_level;
+            if(s_timer != 0){
+                if(adsr_counter[aux] < s_timer){
+                    adsr_counter[aux]++;
+                }
+                else{
+                    adsr_counter[aux] = 0;
+                    channel_alloc[aux] = 5;
+                }
+            }
+        }
+        if(channel_alloc[aux] == 4){
+            adsr_counter[aux] = 0;
+            adsr_crop = adsr_vca[aux];
+            channel_alloc[aux] = 5;// transição de quebra
+        }
+        if(channel_alloc[aux] == 5){
+            if(adsr_counter[aux] < r_timer){
+                adsr_counter[aux]++;
+                adsr_vca[aux] = (adsr_crop *(r_timer - adsr_counter[aux])) / r_timer;
+            }
+            else{
+                adsr_counter[aux] = 0;
+                channel_alloc[aux] = 6;
+            }
+        }
+    }
+
     // LFO1
     // LFO2
     // MOD_ENV
+    // controls
 }
 
 /* all core 1 operations will be executed in task1()
@@ -1162,7 +1285,6 @@ void task_init(void){
         lut_r[aux] /= reduction;
     }
 
-    //filter_alpha = (2 * PI * cutoff_freq) / 40000;
-    //inp_factor = (uint32_t)((float)(filter_factor * filter_alpha) / (float)(1 + filter_alpha));
-    //out_factor = (uint32_t)((float)(filter_factor) / (float)(1 + filter_alpha));
+    adjust_filter(0b00010000, 0); // 10000 = 0b 0010 0111 0001 0000
+    adjust_filter(0b00100111, 0);
 }

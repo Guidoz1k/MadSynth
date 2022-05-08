@@ -18,7 +18,7 @@ void serial0_init(){
 void serial0_write_number(int_fast32_t number, uint_fast8_t newline){
     char buffer[12];
 
-    if(number > 0)
+    if(number >= 0)
         buffer[0] = '+';
     else{
         buffer[0] = '-';
@@ -65,4 +65,19 @@ void serial0_new_line(void){
     char buffer = '\n';
 
     uart_write_bytes(UART_NUM_0, &buffer, 1);
+}
+
+void serial0_write_string(const char *pointer, uint8_t newline){
+	uint8_t counter = 0;
+    char buffer[MAXSIZE + 1] = {0};
+
+	while((counter < MAXSIZE) && (*pointer != '\0')){
+        buffer[counter++] = *(pointer++);
+	}
+    if(newline == 1)
+        buffer[counter] = '\n';
+    else
+        counter--;
+
+    uart_write_bytes(UART_NUM_0, buffer, counter + 1);
 }

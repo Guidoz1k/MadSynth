@@ -95,9 +95,8 @@
 213	--> MOD ENV S_mod
 214	--> MOD ENV R_mod
 
-######################################################TBD
-	mod envelope
-	ALL POST-FX
+220 --> low-pass filter state
+221 --> low-pass filter cut-off frequency
 */
 
 // initialize the serial peripheral
