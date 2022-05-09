@@ -13,7 +13,8 @@ int main(){
 	int32_t integer = 0;
 	float temp_number = 0;
 
-	int32_t option = 2; // 0 = sine, 1 = square, 2 = sawtooth, 3 = triangle, 4 = inverted sawtooth
+	int32_t option = 6; // 0 = sine, 1 = square, 2 = sawtooth (phased), 3 = triangle
+						// 4 = inverted sawtooth (phased), 5 = sawtooth, 6 = inverted sawtooth 
 
 	for(counter = 0; counter < SIZE; counter++){
 		switch(option){
@@ -50,6 +51,12 @@ int main(){
 				integer = - counter * (float)((float)(MAX - 1) / (float)(SIZE - 1));
 				if(counter >= 1000)
 					integer += MAX;
+			case 5:
+				integer = - (MAX / 2) + counter * (float)((float)(MAX - 1) / (float)(SIZE - 1));
+				break;
+			case 6:
+				integer = + (MAX / 2) - counter * (float)((float)(MAX - 1) / (float)(SIZE - 1));
+				break;
 			default:
 				break;
 		}

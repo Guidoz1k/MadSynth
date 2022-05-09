@@ -10,6 +10,7 @@
 #include "sdkconfig.h"
 
 #include "i2s_imp.h"
+#include "lut.h"
 
 #define LUTSIZE     2000
 #define LEDPIN      2       // built-in led pin
@@ -18,7 +19,6 @@
 #define BROKEHF     80000
 
 #define PI          3.1415926
-
 
 void task0(void);
 
