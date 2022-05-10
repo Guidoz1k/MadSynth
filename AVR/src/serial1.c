@@ -94,6 +94,7 @@
 212	--> MOD ENV S time_mod
 213	--> MOD ENV S_mod
 214	--> MOD ENV R_mod
+215 --> MOD ENV maximum value
 
 220 --> low-pass filter state
 221 --> low-pass filter cut-off frequency

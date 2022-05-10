@@ -636,6 +636,7 @@ void loop(){
 
     // MOD ENV variables
     static STATE me_state = off_t;      // 0 - off, 1 - on
+    static uint16_t me_max = 250;       // 0 - off, 1 - on
     static uint16_t me_a = 0;       // 0 ... 10000 ms
     static uint16_t me_d = 0;       // 0 ... 10000 ms
     static uint16_t me_s = 0;       // 0 ... 10000 ms
@@ -3025,7 +3026,7 @@ void loop(){
         }
         break;
     case 191:
-        lcd_write_string("10 Release control       ", 26, 2, 0);
+        lcd_write_string("10 Release control       ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_r_mod, encoder_rotation, modifier_t);
         if(modification != me_r_mod){
@@ -3043,10 +3044,35 @@ void loop(){
         case 3:
             break;
         case 4:
+            change_submenu(192);
+            lcd_write_number(me_max, 3, 3, DIGIT_POS - 3);
             break;
         case 5:
             change_submenu(190);
             lcd_write_string(MODIFIER_TEXT[me_s_mod], 26, 3, 0);
+            break;
+        default:
+            break;
+        }
+        break;
+    case 192:
+        lcd_write_string("11 Maximum Value          ", 26, 2, 0);
+        lcd_write_char(127, 2, 24);
+        me_max = ui_digit_set(me_max, encoder_rotation, 3, 1, MAXADSR);
+        transmit_on_change(215, me_max, 1);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            change_submenu(11);
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
+            change_submenu(191);
+            lcd_write_string(MODIFIER_TEXT[me_r_mod], 26, 3, 0);
             break;
         default:
             break;

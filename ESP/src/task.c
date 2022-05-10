@@ -16,8 +16,8 @@ volatile uint_fast8_t channel_alloc[VOICEM] = {0};
 
 uint_fast32_t bobMax = LUTSIZE << 10;
 uint_fast8_t voice_counter = 0;       // 0 - VOICEM number of voices
-const uint32_t keys_freq[13 + 108 + 13] = {
-    BROKELF,
+const uint32_t keys_freq[KEYOFFSET + 108 + KEYOFFSET] = {
+    BROKELF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,
     BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,BROKELF,
     164,    173,    184,    194,    206,    218,    231,    245,    260,    275,    291,    309,
     327,    346,    367,    389,    412,    437,    462,    490,    519,    550,    583,    617,
@@ -29,7 +29,7 @@ const uint32_t keys_freq[13 + 108 + 13] = {
     20930,  22175,  23493,  24890,  26370,  27938,  29600,  31360,  33224,  35200,  37293,  39511,
     41860,  44349,  46986,  49780,  52740,  55877,  59109,  62719,  66449,  70400,  74586,  79021,
     BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,
-    BROKEHF,
+    BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,BROKEHF,
 };
 const uint8_t agm[VOICEM] = {
     0,
@@ -49,9 +49,9 @@ int_fast32_t vca1 = 0;
 int_fast32_t vca2 = 0;
 uint8_t oct_trans = 2;
 int8_t note_trans = 0;
-int8_t note_cent = 0;
+int16_t note_cent = 0;
 uint8_t stereo = 0; // 0 - LR, 1 - L, 2 - R
-uint8_t key_tune = 13 + (2 * 12);
+uint8_t key_tune = KEYOFFSET + (2 * 12);
 
 uint8_t shape1 = 0;
 uint8_t shape2 = 0;
@@ -93,6 +93,20 @@ uint16_t r_timer = 0;
 uint16_t adsr_counter[VOICEM] = {0};
 uint16_t adsr_vca[VOICEM] = {0}; // 0 - 128
 uint16_t adsr_crop = 0;
+
+// MOD ENV variables
+uint16_t me_status = 0; // on or off
+uint16_t me_keys = 0;   // number of keys
+uint16_t me_max = 250;        // 0 - 250
+uint16_t me_a_timer = 0;
+uint16_t me_d_timer = 0;
+uint16_t me_s_level = 100;
+uint16_t me_s_timer = 0;
+uint16_t me_r_timer = 0;
+uint16_t me_crop = 0;
+uint16_t me_state = 5;      // 0 reset and go, 1 2 3 4 ADSR, 5 finished
+uint16_t me_counter = 0;
+uint16_t me_output = 0;
 
 // DDS control variables
 /*
@@ -165,6 +179,20 @@ static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
 
 // ============================================================ TASK 0 FUNCTIONS
 
+void me_start(void){
+    if(me_keys == 0){
+        me_state = 0;
+        me_keys++;
+    }
+}
+
+void me_stop(void){
+    if(me_keys == 1){
+        me_state = 4;
+        me_keys--;
+    }
+}
+
 uint16_t power2(uint16_t degree){
     uint16_t result = 1;
     uint8_t aux = 0;
@@ -189,7 +217,7 @@ void adjust_filter(int32_t new_freq, uint8_t byte){
 }
 
 void update_tune(void){
-    key_tune = 13 + (12 * oct_trans) + note_trans;
+    key_tune = KEYOFFSET + (12 * oct_trans) + note_trans;
 }
 
 void change_frequency(uint32_t frequency, uint16_t number){
@@ -366,6 +394,30 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         break;
     }
 
+    { // MOD ENV
+    case 199:
+        me_status = uart_message;
+        break;
+    case 200:
+        me_a_timer = uart_message;
+        break;
+    case 202:
+        me_d_timer = uart_message;
+        break;
+    case 204:
+        me_s_timer = uart_message;
+        break;
+    case 206:
+        me_s_level = uart_message;
+        break;
+    case 208:
+        me_r_timer = uart_message;
+        break;
+    case 215:
+        me_max = uart_message;
+        break;
+    }
+
     default:
         break;
     }
@@ -382,10 +434,14 @@ void serial_ops(void){
     if(uart_count == 2){
         if((uart_code >= 1) && (uart_code <= 108)){
             uart_code -= 1;
-            if(uart_message == 0)
+            if(uart_message == 0){
                 remove_voice(uart_code);
-            else
+                me_stop();
+            }
+            else{
                 set_voice(uart_code);
+                me_start();
+            }
         }
         else
             serial_command(uart_code, uart_message);
@@ -547,10 +603,70 @@ void task1(void){
         }
     }
 
-    // LFO1
-    // LFO2
-    // MOD_ENV
-    // controls
+    {// LFO1
+    }
+
+    {// LFO2
+    }
+
+    if(me_status == 1){// MOD_ENV
+        if(me_state == 0){
+            me_counter = 0;
+            me_output = 0;
+            me_state = 1;
+        }
+        if(me_state == 1){
+            if(me_counter < me_a_timer){
+                me_counter++;
+                me_output = (me_counter * 100) / me_a_timer;
+            }
+            else{
+                me_output = 100;
+                me_counter = 0;
+                me_state = 2;
+            }
+        }
+        if(me_state == 2){
+            if(me_counter < me_d_timer){
+                me_counter++;
+                me_output = 100 - (((100 - me_s_level) * me_counter) / (me_d_timer - 1));
+            }
+            else{
+                me_counter = 0;
+                me_state = 3;
+            }
+        }
+        if(me_state == 3){
+            me_output = me_s_level;
+            if(me_s_timer != 0){
+                if(me_counter < me_s_timer){
+                    me_counter++;
+                }
+                else{
+                    me_counter = 0;
+                    me_state = 4;
+                }
+            }
+        }
+        if(me_state == 4){
+            me_crop = me_output;
+            if(me_counter < me_r_timer){
+                me_counter++;
+                me_output = (me_crop *(me_r_timer - me_counter)) / me_r_timer;
+            }
+            else{
+                me_state = 5;
+            }
+        }
+        me_output = (me_max * me_output) / 100;
+    }
+    else{
+        me_counter = 0;
+        me_output = 250;
+    }
+
+    {// controls
+    }
 }
 
 /* all core 1 operations will be executed in task1()

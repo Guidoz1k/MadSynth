@@ -17,6 +17,7 @@
 #define VOICEM      61
 #define BROKELF     150
 #define BROKEHF     80000
+#define KEYOFFSET   24
 
 #define PI          3.1415926
 
