@@ -321,19 +321,19 @@ uint8_t ui_text_set(uint8_t old_value, int8_t ticks, TEXTS text_type){
 
 void control_update(void){
     if(modifier_allocation[6] != 0)
-        serial1_transmit(200, adc_read(0));
+        serial1_transmit(230, adc_read(0));
     if(modifier_allocation[7] != 0)
-        serial1_transmit(201, adc_read(1));
+        serial1_transmit(231, adc_read(1));
     if(modifier_allocation[8] != 0)
-        serial1_transmit(202, adc_read(2));
+        serial1_transmit(232, adc_read(2));
     if(modifier_allocation[9] != 0)
-        serial1_transmit(203, adc_read(3));
+        serial1_transmit(233, adc_read(3));
     if(modifier_allocation[10] != 0)
-        serial1_transmit(204, adc_read(4));
+        serial1_transmit(234, adc_read(4));
     if(modifier_allocation[11] != 0)
-        serial1_transmit(205, adc_read(5));
+        serial1_transmit(235, adc_read(5));
     if(modifier_allocation[12] != 0)
-        serial1_transmit(206, adc_read(6));
+        serial1_transmit(236, adc_read(6));
 }
 
 void change_submenu(uint8_t submenu){
@@ -2385,7 +2385,7 @@ void loop(){
     case 155:
         lcd_write_string("04 Frequency             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        lfo1_freq = ui_digit_set(lfo1_freq, encoder_rotation, 3, 1, 250);
+        lfo1_freq = ui_digit_set(lfo1_freq, encoder_rotation, 3, 1, 25);
         transmit_on_change(164, lfo1_freq, 1);
         switch(button_pressed){
         case 1:
@@ -2594,7 +2594,7 @@ void loop(){
     case 165:
         lcd_write_string("04 Frequency             ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
-        lfo2_freq = ui_digit_set(lfo2_freq, encoder_rotation, 3, 1, 250);
+        lfo2_freq = ui_digit_set(lfo2_freq, encoder_rotation, 3, 1, 25);
         transmit_on_change(174, lfo2_freq, 1);
         switch(button_pressed){
         case 1:

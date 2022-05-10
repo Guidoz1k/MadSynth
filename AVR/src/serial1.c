@@ -64,7 +64,7 @@
 175 --> LFO2 amp_mod
 176 --> LFO2 freq_mod
 
-// manual controls' values
+// manual controls' amplitudes
 180 --> pitch wheel
 181 --> mod wheel
 182 --> slider 1
@@ -98,6 +98,17 @@
 
 220 --> low-pass filter state
 221 --> low-pass filter cut-off frequency
+
+230 --> pitch wheel value
+231 --> mod wheel value
+232 --> slider 1 value
+233 --> slider 2 value
+234 --> slider 3 value
+235 --> slider 4 value
+236 --> slider 5 value
+
+240 -- > reverb state
+
 */
 
 // initialize the serial peripheral

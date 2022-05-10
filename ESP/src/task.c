@@ -73,6 +73,7 @@ uint16_t harm_atten_old[5][16] = {
     {1000,   666,   545,   480,   437,   408,   385,   367,   353,   341,   331,   322,   314,   307,   301,   295}, // inverted sawtooth
 };
 */
+
 // low-pass filter variables
 uint8_t filter_state = 0;
 int32_t cutoff_freq = 10000; // variavel real
@@ -108,76 +109,77 @@ uint16_t me_state = 5;      // 0 reset and go, 1 2 3 4 ADSR, 5 finished
 uint16_t me_counter = 0;
 uint16_t me_output = 0;
 
-// DDS control variables
-/*
-typedef enum _mod{
-    none = 0,
-    lfo1 = 1,
-    lfo2 = 2,
-    noiser = 3,
-    note = 4,
-    speed = 5,
-    pitch_w = 6,
-    mod_w = 7,
-    slider1 = 8,
-    slider2 = 9,
-    slider3 = 10,
-    slider4 = 11,
-    slider5 = 12
-} MODIFIER;
-typedef enum _shape{
-    sinusoid = 0,
-    triangle = 1,
-    square = 2,
-    sawtooth = 3,
-    inv_sawtooth = 4
-} SHAPE;
-typedef enum _state{
-    off_t = 0,
-    on_t = 1
-} STATE;
+// LFO variables
+uint8_t lfo1_state = 0; // 0 - off, 1 - on
+uint8_t lfo1_mode = 0;
+uint8_t lfo1_shape = 0;
+uint8_t lfo1_amp = 0;   // 0 ... 100
+uint16_t lfo1_counter = 1;  // 0 ... 25
+uint16_t lfo1_inc = 0;
+int16_t lfo1_input = 0;
+int16_t lfo1_output = 0;
 
-static uint8_t amp_pw = 0;  // 0 ... 99
-static uint8_t amp_mw = 0;  // 0 ... 99
-static uint8_t amp_kn = 0;  // 0 ... 99
-static uint8_t amp_ks = 0;  // 0 ... 99
-static uint8_t amp_s1 = 0;  // 0 ... 99
-static uint8_t amp_s2 = 0;  // 0 ... 99
-static uint8_t amp_s3 = 0;  // 0 ... 99
-static uint8_t amp_s4 = 0;  // 0 ... 99
-static uint8_t amp_s5 = 0;  // 0 ... 99
+uint8_t lfo2_state = 0; // 0 - off, 1 - on
+uint8_t lfo2_mode = 0;
+uint8_t lfo2_shape = 0;
+uint8_t lfo2_amp = 0;   // 0 ... 100
+uint16_t lfo2_counter = 1;  // 0 ... 25
+uint16_t lfo2_inc = 0;
+int16_t lfo2_input = 0;
+int16_t lfo2_output = 0;  
 
-static STATE lfo1_state = off_t; // 0 - off, 1 - on
-static O_MODE lfo1_mode = frees;
-static SHAPE lfo1_shape = sinusoid;
-static uint8_t lfo1_amp = 0;   // 0 ... 100
-static uint8_t lfo1_freq = 0;  // 0 ... 250
-static MODIFIER lfo1_amp_mod = none;  // modifier for lfo1 amplitude
-static MODIFIER lfo1_freq_mod = none; // modifier for lfo1 frequency
+// analog control variables
+uint8_t amp_pw = 0;  // 0 ... 99
+uint8_t amp_mw = 0;  // 0 ... 99
+uint8_t amp_kn = 0;  // 0 ... 99
+uint8_t amp_ks = 0;  // 0 ... 99
+uint8_t amp_s1 = 0;  // 0 ... 99
+uint8_t amp_s2 = 0;  // 0 ... 99
+uint8_t amp_s3 = 0;  // 0 ... 99
+uint8_t amp_s4 = 0;  // 0 ... 99
+uint8_t amp_s5 = 0;  // 0 ... 99
 
-static STATE lfo2_state = off_t; // 0 - off, 1 - on
-static O_MODE lfo2_mode = frees;
-static SHAPE lfo2_shape = sinusoid;
-static uint8_t lfo2_amp = 0;   // 0 ... 100
-static uint8_t lfo2_freq = 0;  // 0 ... 250
-static MODIFIER lfo2_amp_mod = none;  // modifier for lfo2 amplitude
-static MODIFIER lfo2_freq_mod = none; // modifier for lfo2 frequency
+// control variables
 
-// MOD ENV variables
-static STATE me_state = off_t;      // 0 - off, 1 - on
-static uint16_t me_a = 0;       // 0 ... 10000 ms
-static uint16_t me_d = 0;       // 0 ... 10000 ms
-static uint16_t me_s = 0;       // 0 ... 10000 ms
-static uint16_t me_sl = 0;      // 0 ... 100%
-static uint16_t me_r = 1;       // 1 ... 10000 ms
-static MODIFIER me_a_mod = none;    // modifier for MOD ENV A parameter
-static MODIFIER me_d_mod = none;    // modifier for MOD ENV D parameter
-static MODIFIER me_s_mod = none;    // modifier for MOD ENV S parameter
-static MODIFIER me_sl_mod = none;   // modifier for MOD ENV SL parameter
-static MODIFIER me_r_mod = none;    // modifier for MOD ENV R parameter
-*/
+// ============================================================ DDS PERIPHERAL FUNCTIONS
 
-// ============================================================ TASK 0 FUNCTIONS
+void lfo_freq(uint8_t lfo, uint16_t freq){
+    switch(lfo){
+    case 1:
+        lfo1_inc = freq * 2;
+        break;
+    case 2:
+        lfo2_inc =  freq * 2;
+        break;
+    default:
+        break;
+    }
+}
+
+void lfo_set(uint8_t lfo, uint8_t state){
+    switch(lfo){
+    case 1:
+        if(state == 0)
+            lfo1_state = 0;
+        else{
+            lfo1_state = 1;
+            if(lfo1_mode == 1)
+                lfo1_counter = 0;
+        }
+        break;
+    case 2:
+        if(state == 0)
+            lfo2_state = 0;
+        else{
+            lfo2_state = 1;
+            if(lfo2_mode == 1)
+                lfo2_counter = 0;
+        }
+        break;
+    default:
+        break;
+    }
+}
 
 void me_start(void){
     if(me_keys == 0){
@@ -215,6 +217,8 @@ void adjust_filter(int32_t new_freq, uint8_t byte){
         }
 
 }
+
+// ============================================================ DDS CORE FUNCTIONS
 
 void update_tune(void){
     key_tune = KEYOFFSET + (12 * oct_trans) + note_trans;
@@ -271,8 +275,8 @@ void change_shape(uint8_t channel, uint8_t shape, uint8_t sub_socs){
     for(j = 0; j <= sub_socs; j++){
         harm_acc = 0;
         for(i = 0; i < LUTSIZE; i++){
-            temp = harm_atten[shape][sub_socs] * pointer_in[harm_acc];
-            temp /= 1000;//(j + 1) * 1000;
+            temp = harm_atten[shape][sub_socs] * pointer_in[harm_acc] ;
+            temp /= 1000 * VOICEM;//(j + 1) * 1000;
             pointer_out[i] += (int16_t)temp;
             harm_acc += power2(j);
             if(harm_acc >= LUTSIZE)
@@ -310,7 +314,7 @@ void remove_voice(uint16_t number){
         channel_alloc[number] = 4;
 }
 
-// ============================================================ TASK 1 FUNCTIONS
+// ============================================================ TASK 1 SERIAL FUNCTIONS
 
 void serial_command(uint8_t uart_code, uint8_t uart_message){
     uint8_t aux;
@@ -415,6 +419,69 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         break;
     case 215:
         me_max = uart_message;
+        break;
+    }
+
+    { // LFO
+    case 160:
+        lfo_set(1, uart_message);
+        break;
+    case 161:
+        lfo1_mode = uart_message;
+        break;
+    case 162:
+        lfo1_shape = uart_message;
+        break;
+    case 163:
+        lfo1_amp = uart_message;
+        break;
+    case 164:
+        lfo_freq(1, uart_message);
+        break;
+    case 170:
+        lfo_set(2, uart_message);
+        break;
+    case 171:
+        lfo2_mode = uart_message;
+        break;
+    case 172:
+        lfo2_shape = uart_message;
+        break;
+    case 173:
+        lfo2_amp = uart_message;
+        break;
+    case 174:
+        lfo_freq(2, uart_message);
+        break;
+    }
+
+    { // controls
+    case 180:
+        amp_pw = uart_message;
+        break;
+    case 181:
+        amp_mw = uart_message;
+        break;
+    case 182:
+        amp_kn = uart_message;
+        break;
+    case 183:
+        amp_ks = uart_message;
+        break;
+    case 184:
+        amp_s1 = uart_message;
+        break;
+    case 185:
+        amp_s2 = uart_message;
+        break;
+    case 186:
+        amp_s3 = uart_message;
+        break;
+    case 187:
+        amp_s4 = uart_message;
+        break;
+    case 188:
+        amp_s5 = uart_message;
         break;
     }
 
@@ -603,10 +670,66 @@ void task1(void){
         }
     }
 
-    {// LFO1
+    { // LFO1
+    switch(lfo1_shape){
+    case 0:
+        lfo1_input = lut_sinuso[lfo1_counter];
+        break;
+    case 1:
+        lfo1_input = lut_triang[lfo1_counter];
+        break;
+    case 2:
+        lfo1_input = lut_square[lfo1_counter];
+        break;
+    case 3:
+        lfo1_input = lut_sawtoo[lfo1_counter];
+        break;
+    case 4:
+        lfo1_input = lut_invsaw[lfo1_counter];
+        break;
+    default:
+        break;
+    }
+    lfo1_input = (lfo1_amp * (lfo1_input >> 8)) / 128;
+    if(lfo1_counter < LUTSIZE)
+        lfo1_counter += lfo1_inc;
+    else
+        lfo1_counter -= LUTSIZE;
+    if(lfo1_state == 1)
+        lfo1_output = lfo1_input;
+    else
+        lfo1_output = 0;
     }
 
-    {// LFO2
+    { // LFO2
+    switch(lfo2_shape){
+    case 0:
+        lfo2_input = lut_sinuso[lfo2_counter];
+        break;
+    case 1:
+        lfo2_input = lut_triang[lfo2_counter];
+        break;
+    case 2:
+        lfo2_input = lut_square[lfo2_counter];
+        break;
+    case 3:
+        lfo2_input = lut_sawtoo[lfo2_counter];
+        break;
+    case 4:
+        lfo2_input = lut_invsaw[lfo2_counter];
+        break;
+    default:
+        break;
+    }
+    lfo2_input = (lfo2_amp * (lfo2_input >> 8)) / 128;
+    if(lfo2_counter < LUTSIZE)
+        lfo2_counter += lfo2_inc;
+    else
+        lfo2_counter -= LUTSIZE;
+    if(lfo2_state == 1)
+        lfo2_output = lfo2_input;
+    else
+        lfo2_output = 0;
     }
 
     if(me_status == 1){// MOD_ENV
@@ -666,6 +789,21 @@ void task1(void){
     }
 
     {// controls
+    /*
+    none = 0,
+    lfo1 = 1,
+    lfo2 = 2,
+    noiser = 3,
+    note = 4,
+    speed = 5,
+    pitch_w = 6,
+    mod_w = 7,
+    slider1 = 8,
+    slider2 = 9,
+    slider3 = 10,
+    slider4 = 11,
+    slider5 = 12
+    */
     }
 }
 
@@ -681,11 +819,6 @@ void task_init(void){
     uint8_t reduction = VOICEM;
 
     for(aux = 0; aux < LUTSIZE; aux++){
-        lut_sinuso[aux] /= reduction;
-        lut_square[aux] /= reduction;
-        lut_triang[aux] /= reduction;
-        lut_sawtoo[aux] /= reduction;
-        lut_invsaw[aux] /= reduction;
         lut_l[aux] /= reduction;
         lut_r[aux] /= reduction;
     }
