@@ -19,6 +19,13 @@
 #define BROKEHF     80000
 #define KEYOFFSET   24
 
+#define REVERB1     2003
+#define REVERB2     2011
+#define REVERB3     2017
+#define REVERB4     2027
+
+#define REVERB5     439
+#define REVERB6     149
 #define PI          3.1415926
 
 void task0(void);

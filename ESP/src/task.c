@@ -76,17 +76,6 @@ uint16_t harm_atten_old[5][16] = {
 };
 */
 
-// low-pass filter variables
-uint8_t filter_state = 0;
-int32_t cutoff_freq = 10000; // variavel real
-int32_t filter_alpha = 0;
-int32_t filter_factor = 10000;
-int32_t inp_factor = 0;
-int32_t out_factor = 0;
-
-// reverb fx variables
-uint8_t reverb_state = 0;
-
 // ADSR variables
 uint16_t a_timer = 0;
 uint16_t d_timer = 0;
@@ -163,17 +152,26 @@ int16_t value_s5 = 0; // 0 ... 255
 // control states
 uint8_t osc1_cent_mod = 0;
 uint8_t osc1_trans_mod = 0;
-
 uint8_t a_mod = 0;
 uint8_t d_mod = 0;
 uint8_t s_mod = 0;
 uint8_t sl_mod = 0;
 uint8_t r_mod = 0;
-
 uint8_t lfo1_fmod = 0;
 uint8_t lfo1_amod = 0;
 uint8_t lfo2_fmod = 0;
 uint8_t lfo2_amod = 0;
+
+// low-pass filter variables
+uint8_t filter_state = 0;
+int32_t cutoff_freq = 10000; // variavel real
+int32_t filter_alpha = 0;
+int32_t filter_factor = 10000;
+int32_t inp_factor = 0;
+int32_t out_factor = 0;
+
+// reverb fx variables
+uint8_t reverb_state = 0;
 
 // ============================================================ DDS CONTROL FUNCTIONS
 
@@ -292,6 +290,13 @@ uint16_t power2(uint16_t degree){
         result *= 2;
 
     return result;
+}
+
+void readjust_filter(int32_t new_freq){
+    cutoff_freq = new_freq;
+    filter_alpha = (filter_factor * (2 * PI * cutoff_freq)) / 40000;
+    inp_factor = ((filter_factor * filter_alpha) / (filter_factor + filter_alpha));
+    out_factor = ((filter_factor * filter_factor) / (filter_factor + filter_alpha));
 }
 
 void adjust_filter(int32_t new_freq, uint8_t byte){
@@ -483,6 +488,7 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
     { // LPF
     case 220:
         filter_state = uart_message;
+        readjust_filter(cutoff_freq);
         break;
     case 221:
         adjust_filter(uart_message, 0);
@@ -649,6 +655,13 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         break;
     }
 
+    { // reverb
+    case 240:
+        reverb_state = uart_message;
+        serial0_write_number(reverb_state, 1);
+        break;
+    }
+
     default:
         break;
     }
@@ -684,6 +697,7 @@ void serial_ops(void){
 // ============================================================ MAIN FUNCTIONS
 
 void task0(void){ // can't use float in ISR
+    // main variables
     int_fast16_t out_r = 0, out_l = 0;
     int_fast16_t master_r = 0, master_l = 0;
     int_fast16_t mono = 0;
@@ -693,10 +707,6 @@ void task0(void){ // can't use float in ISR
     // low-pass filter variables
     static int_fast32_t filter_l = 0;
     static int_fast32_t filter_r = 0;
-    int_fast16_t filter_out_r = 0, filter_out_l = 0;
-
-    // reverb variables
-    int_fast16_t reverb_out_r = 0, reverb_out_l = 0;
 
     // DDS engine
     for(aux = 0; aux < VOICEM; aux++){
@@ -721,22 +731,12 @@ void task0(void){ // can't use float in ISR
     filter_r = ((inp_factor * out_r)/filter_factor) + ((out_factor * filter_r)/filter_factor);
     filter_l = ((inp_factor * out_l)/filter_factor) + ((out_factor * filter_l)/filter_factor);
     if(filter_state == 0){
-        filter_out_r = out_r;
-        filter_out_l = out_l;
+        master_r = out_r;
+        master_l = out_l;
     }
     else{
-        filter_out_r = filter_r;
-        filter_out_l = filter_l;
-    }
-
-    // reverb fx
-    if(reverb_state == 0){
-        master_r = filter_out_r;
-        master_l = filter_out_l;
-    }
-    else{
-        master_r = reverb_out_r;
-        master_l = reverb_out_l;
+        master_r = filter_r;
+        master_l = filter_l;
     }
 
     // stereo config
@@ -1009,6 +1009,6 @@ void task_init(void){
         lut_r[aux] /= reduction;
     }
 
-    adjust_filter(0b00010000, 0); // 10000 = 0b 0010 0111 0001 0000
-    adjust_filter(0b00100111, 0);
+    
+    readjust_filter(cutoff_freq);
 }

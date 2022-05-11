@@ -653,7 +653,7 @@ void loop(){
     static uint16_t cutoff_freq = 10000;
 
     // reverb effect variables
-    //static STATE reverb_state = off_t;
+    static STATE reverb_state = off_t;
 
     // key state machine to serial routine
     for(i = 0; i < (MAXKEYS / 2); i++){
@@ -1018,9 +1018,9 @@ void loop(){
         case 2:
             break;
         case 3:
-            //lcd_write_string("  ", 26, 0, 24);
-            //lcd_write_string(STATE_TEXT[reverb_state], 26, 3, 0);
-            //menu_state = 210;
+            lcd_write_string("  ", 26, 0, 24);
+            lcd_write_string(STATE_TEXT[reverb_state], 26, 3, 0);
+            menu_state = 210;
             break;
         case 4:
             break;
@@ -3131,6 +3131,31 @@ void loop(){
         case 5:
             change_submenu(200);
             lcd_write_string(STATE_TEXT[filter_state], 26, 3, 0);
+            break;
+        default:
+            break;
+        }
+        break;
+    }
+
+    {}
+
+    { // reverb
+    case 210:
+        lcd_write_string("00 Reverb  State          ", 26, 2, 0);
+        reverb_state = ui_text_set(reverb_state, encoder_rotation, state_t);
+        transmit_on_change(240, reverb_state, 1);
+        switch(button_pressed){
+        case 1:
+            //break;
+        case 2:
+            change_submenu(13);
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        case 5:
             break;
         default:
             break;
