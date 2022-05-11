@@ -45,7 +45,7 @@
 149	--> ADSR R time	1	--> second byte when necessary
 150	--> ADSR A_mod
 151	--> ADSR D_mod
-152	--> ADSR S time_mod
+152	--> ADSR SL_mod
 153	--> ADSR S_mod
 154	--> ADSR R_mod
 

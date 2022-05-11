@@ -603,15 +603,15 @@ void loop(){
     static MODIFIER adsr_sl_mod = none;   // modifier for adsr SL parameter
     static MODIFIER adsr_r_mod = none;    // modifier for adsr R parameter
 
-    static uint8_t amp_pw = 0;  // 0 ... 99
-    static uint8_t amp_mw = 0;  // 0 ... 99
-    static uint8_t amp_kn = 0;  // 0 ... 99
-    static uint8_t amp_ks = 0;  // 0 ... 99
-    static uint8_t amp_s1 = 0;  // 0 ... 99
-    static uint8_t amp_s2 = 0;  // 0 ... 99
-    static uint8_t amp_s3 = 0;  // 0 ... 99
-    static uint8_t amp_s4 = 0;  // 0 ... 99
-    static uint8_t amp_s5 = 0;  // 0 ... 99
+    static uint8_t amp_pw = 99;  // 0 ... 99
+    static uint8_t amp_mw = 99;  // 0 ... 99
+    static uint8_t amp_kn = 99;  // 0 ... 99
+    static uint8_t amp_ks = 99;  // 0 ... 99
+    static uint8_t amp_s1 = 99;  // 0 ... 99
+    static uint8_t amp_s2 = 99;  // 0 ... 99
+    static uint8_t amp_s3 = 99;  // 0 ... 99
+    static uint8_t amp_s4 = 99;  // 0 ... 99
+    static uint8_t amp_s5 = 99;  // 0 ... 99
 
     static STATE lfo1_state = off_t; // 0 - off, 1 - on
     static O_MODE lfo1_mode = frees;
@@ -2906,7 +2906,7 @@ void loop(){
         }
         break;
     case 187:
-        lcd_write_string("06 Attack control        ~", 26, 2, 0);
+        lcd_write_string("06 Attack control      X ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_a_mod, encoder_rotation, modifier_t);
         if(modification != me_a_mod){
@@ -2936,7 +2936,7 @@ void loop(){
         }
         break;
     case 188:
-        lcd_write_string("07 Decay control         ~", 26, 2, 0);
+        lcd_write_string("07 Decay control       X ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_d_mod, encoder_rotation, modifier_t);
         if(modification != me_d_mod){
@@ -2966,7 +2966,7 @@ void loop(){
         }
         break;
     case 189:
-        lcd_write_string("08 Sustain lvl control   ~", 26, 2, 0);
+        lcd_write_string("08 Sustain lvl control X ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_sl_mod, encoder_rotation, modifier_t);
         if(modification != me_sl_mod){
@@ -2996,7 +2996,7 @@ void loop(){
         }
         break;
     case 190:
-        lcd_write_string("09 Sustain control       ~", 26, 2, 0);
+        lcd_write_string("09 Sustain control     X ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_s_mod, encoder_rotation, modifier_t);
         if(modification != me_s_mod){
@@ -3026,7 +3026,7 @@ void loop(){
         }
         break;
     case 191:
-        lcd_write_string("10 Release control       ~", 26, 2, 0);
+        lcd_write_string("10 Release control     X ~", 26, 2, 0);
         lcd_write_char(127, 2, 24);
         modification = ui_text_set(me_r_mod, encoder_rotation, modifier_t);
         if(modification != me_r_mod){

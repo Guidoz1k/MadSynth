@@ -48,7 +48,9 @@ int_fast8_t mixer2 = 50;
 int_fast32_t vca1 = 0;
 int_fast32_t vca2 = 0;
 uint8_t oct_trans = 2;
-int8_t note_trans = 0;
+int16_t note_trans_raw = 0;
+int16_t note_cent_raw = 0;
+int16_t note_trans = 0;
 int16_t note_cent = 0;
 uint8_t stereo = 0; // 0 - LR, 1 - L, 2 - R
 uint8_t key_tune = KEYOFFSET + (2 * 12);
@@ -91,6 +93,11 @@ uint16_t d_timer = 0;
 uint16_t s_level = 128;
 uint16_t s_timer = 0;
 uint16_t r_timer = 0;
+uint16_t a_timer_raw = 0;
+uint16_t d_timer_raw = 0;
+uint16_t s_level_raw = 128;
+uint16_t s_timer_raw = 0;
+uint16_t r_timer_raw = 0;
 uint16_t adsr_counter[VOICEM] = {0};
 uint16_t adsr_vca[VOICEM] = {0}; // 0 - 128
 uint16_t adsr_crop = 0;
@@ -114,6 +121,8 @@ uint8_t lfo1_state = 0; // 0 - off, 1 - on
 uint8_t lfo1_mode = 0;
 uint8_t lfo1_shape = 0;
 uint8_t lfo1_amp = 0;   // 0 ... 100
+uint8_t lfo1_amp_raw = 0;   // 0 ... 100
+uint8_t lfo1_freq = 0;   // 0 ... 100
 uint16_t lfo1_counter = 1;  // 0 ... 25
 uint16_t lfo1_inc = 0;
 int16_t lfo1_input = 0;
@@ -123,23 +132,101 @@ uint8_t lfo2_state = 0; // 0 - off, 1 - on
 uint8_t lfo2_mode = 0;
 uint8_t lfo2_shape = 0;
 uint8_t lfo2_amp = 0;   // 0 ... 100
+uint8_t lfo2_amp_raw = 0;   // 0 ... 100
+uint8_t lfo2_freq = 0;   // 0 ... 100
 uint16_t lfo2_counter = 1;  // 0 ... 25
 uint16_t lfo2_inc = 0;
 int16_t lfo2_input = 0;
 int16_t lfo2_output = 0;  
 
 // analog control variables
-uint8_t amp_pw = 0;  // 0 ... 99
-uint8_t amp_mw = 0;  // 0 ... 99
-uint8_t amp_kn = 0;  // 0 ... 99
-uint8_t amp_ks = 0;  // 0 ... 99
-uint8_t amp_s1 = 0;  // 0 ... 99
-uint8_t amp_s2 = 0;  // 0 ... 99
-uint8_t amp_s3 = 0;  // 0 ... 99
-uint8_t amp_s4 = 0;  // 0 ... 99
-uint8_t amp_s5 = 0;  // 0 ... 99
+uint8_t amp_pw = 99;  // 0 ... 99
+uint8_t amp_mw = 99;  // 0 ... 99
+uint8_t amp_kn = 99;  // 0 ... 99
+uint8_t amp_ks = 99;  // 0 ... 99
+uint8_t amp_s1 = 99;  // 0 ... 99
+uint8_t amp_s2 = 99;  // 0 ... 99
+uint8_t amp_s3 = 99;  // 0 ... 99
+uint8_t amp_s4 = 99;  // 0 ... 99
+uint8_t amp_s5 = 99;  // 0 ... 99
 
-// control variables
+int16_t value_pw = 0; // 0 ... 255
+int16_t value_mw = 0; // 0 ... 255
+int16_t value_kn = 0; // 1 ... 61
+int16_t value_ks = 0; // 1 ... 100
+int16_t value_s1 = 0; // 0 ... 255
+int16_t value_s2 = 0; // 0 ... 255
+int16_t value_s3 = 0; // 0 ... 255
+int16_t value_s4 = 0; // 0 ... 255
+int16_t value_s5 = 0; // 0 ... 255
+
+// control states
+uint8_t osc1_cent_mod = 0;
+uint8_t osc1_trans_mod = 0;
+
+uint8_t a_mod = 0;
+uint8_t d_mod = 0;
+uint8_t s_mod = 0;
+uint8_t sl_mod = 0;
+uint8_t r_mod = 0;
+
+uint8_t lfo1_fmod = 0;
+uint8_t lfo1_amod = 0;
+uint8_t lfo2_fmod = 0;
+uint8_t lfo2_amod = 0;
+
+// ============================================================ DDS CONTROL FUNCTIONS
+
+int32_t control_map(int32_t value, int32_t min, int32_t max){
+    if(value < min)
+        value = min;
+    if(value > max)
+        value = max;
+    return value;
+}
+
+int16_t map_key(uint8_t value){
+    int16_t mapped = ((amp_kn * value) / 60) - 50;
+
+    return mapped;
+}
+
+void map_analog(uint8_t input, uint8_t value){
+    /*
+    0 - pw
+    1 - mw
+    2 - s1
+    3 - s2
+    4 - s3
+    5 - s4
+    6 - s5
+    */
+    switch(input){
+    case 0:
+        value_pw = ((amp_pw * value) / 255) - 50;
+        break;
+    case 1:
+        value_mw = ((amp_mw * value) / 255) - 50;
+        break;
+    case 2:
+        value_s1 = ((amp_s1 * value) / 255) - 50;
+        break;
+    case 3:
+        value_s2 = ((amp_s2 * value) / 255) - 50;
+        break;
+    case 4:
+        value_s3 = ((amp_s3 * value) / 255) - 50;
+        break;
+    case 5:
+        value_s4 = ((amp_s4 * value) / 255) - 50;
+        break;
+    case 6:
+        value_s5 = ((amp_s5 * value) / 255) - 50;
+        break;
+    default:
+        break;
+    }
+}
 
 // ============================================================ DDS PERIPHERAL FUNCTIONS
 
@@ -147,9 +234,11 @@ void lfo_freq(uint8_t lfo, uint16_t freq){
     switch(lfo){
     case 1:
         lfo1_inc = freq * 2;
+        lfo1_freq = freq;
         break;
     case 2:
         lfo2_inc =  freq * 2;
+        lfo2_freq = freq;
         break;
     default:
         break;
@@ -302,6 +391,15 @@ void change_voice(uint8_t key){
     change_frequency(aux_freq, key);
 }
 
+void update_voices(void){
+    uint8_t aux;
+
+    update_tune();
+    for(aux = 0; aux < VOICEM; aux++)
+        if(channel_alloc[aux] != 0)
+            change_voice(aux);
+}
+
 void set_voice(uint8_t key){
     uint32_t aux_freq = keys_freq[key_tune + key];
 
@@ -317,8 +415,6 @@ void remove_voice(uint16_t number){
 // ============================================================ TASK 1 SERIAL FUNCTIONS
 
 void serial_command(uint8_t uart_code, uint8_t uart_message){
-    uint8_t aux;
-
     switch(uart_code){
     { // main codes
     case 110:
@@ -329,10 +425,7 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         break;
     case 114:
         oct_trans = uart_message;
-        update_tune();
-        for(aux = 0; aux < VOICEM; aux++)
-            if(channel_alloc[aux] != 0)
-                change_voice(aux);
+        update_voices();
         break;
     case 116:
         mixer1 = uart_message;
@@ -347,18 +440,14 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         change_shape(1, shape1, uart_message);
         break;
     case 124: // used to be 115 but system can only handle 61 osc
-        note_trans = uart_message;
-        update_tune();
-        for(aux = 0; aux < VOICEM; aux++)
-            if(channel_alloc[aux] != 0)
-                change_voice(aux);
+        note_trans = (int8_t)uart_message;
+        note_trans_raw = note_trans;
+        update_voices();
         break;
     case 125:
         note_cent = (int8_t)uart_message;
-        update_tune();
-        for(aux = 0; aux < VOICEM; aux++)
-            if(channel_alloc[aux] != 0)
-                change_voice(aux);
+        note_cent_raw = note_cent;
+        update_voices();
         break;
     case 130:
         change_shape(2, uart_message, sub_osc2);
@@ -371,18 +460,23 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
     { // ADSR
     case 140:
         a_timer = uart_message;
+        a_timer_raw = a_timer;
         break;
     case 142:
         d_timer = uart_message;
+        d_timer_raw = d_timer;
         break;
     case 144:
         s_timer = uart_message;
+        s_timer_raw = s_timer;
         break;
     case 146:
         s_level = uart_message;
+        s_level_raw = s_level;
         break;
     case 148:
         r_timer = uart_message;
+        r_timer_raw = r_timer;
         break;
     }
 
@@ -434,6 +528,7 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         break;
     case 163:
         lfo1_amp = uart_message;
+        lfo1_amp_raw = lfo1_amp;
         break;
     case 164:
         lfo_freq(1, uart_message);
@@ -449,13 +544,14 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
         break;
     case 173:
         lfo2_amp = uart_message;
+        lfo2_amp_raw = lfo2_amp;
         break;
     case 174:
         lfo_freq(2, uart_message);
         break;
     }
 
-    { // controls
+    { // analog controls
     case 180:
         amp_pw = uart_message;
         break;
@@ -483,6 +579,74 @@ void serial_command(uint8_t uart_code, uint8_t uart_message){
     case 188:
         amp_s5 = uart_message;
         break;
+    case 230:
+        map_analog(0, uart_message);
+        break;
+    case 231:
+        map_analog(1, uart_message);
+        break;
+    case 232:
+        map_analog(2, uart_message);
+        break;
+    case 233:
+        map_analog(3, uart_message);
+        break;
+    case 234:
+        map_analog(4, uart_message);
+        break;
+    case 235:
+        map_analog(5, uart_message);
+        break;
+    case 236:
+        map_analog(6, uart_message);
+        break;
+    }
+
+    { // control assignments
+    case 126:
+        osc1_trans_mod = uart_message;
+        break;
+    case 127:
+        osc1_cent_mod = uart_message;
+        break;
+    /* ONLY 61 OSC
+    case 136:
+        osc2_trans_mod = uart_message;
+        break;
+    case 137:
+        osc2_cent_mod = uart_message;
+        break;
+    */
+
+    case 150:
+        a_mod = uart_message;
+        break;
+    case 151:
+        d_mod = uart_message;
+        break;
+    case 152:
+        sl_mod = uart_message;
+        break;
+    case 153:
+        s_mod = uart_message;
+        break;
+    case 154:
+        r_mod = uart_message;
+        break;
+
+    case 165:
+        lfo1_amod = uart_message;
+        break;
+    case 166:
+        lfo1_fmod = uart_message;
+        break;
+
+    case 175:
+        lfo2_amod = uart_message;
+        break;
+    case 156:
+        lfo2_fmod = uart_message;
+        break;
     }
 
     default:
@@ -507,6 +671,8 @@ void serial_ops(void){
             }
             else{
                 set_voice(uart_code);
+                value_ks = ((amp_ks * uart_message) / 100) - (amp_ks / 2);
+                value_kn = map_key(uart_code);
                 me_start();
             }
         }
@@ -591,7 +757,8 @@ void task0(void){ // can't use float in ISR
 }
 
 void task1(void){
-    uint8_t aux = 24;
+    uint8_t aux = 0;
+    int32_t control_demux[13] = {0};
 
     // SERIAL IN
     while((serial1_check() / 2) > 0){
@@ -690,7 +857,7 @@ void task1(void){
     default:
         break;
     }
-    lfo1_input = (lfo1_amp * (lfo1_input >> 8)) / 128;
+    lfo1_input = (lfo1_amp * (lfo1_input >> 8)) / (128 * 2);
     if(lfo1_counter < LUTSIZE)
         lfo1_counter += lfo1_inc;
     else
@@ -721,7 +888,7 @@ void task1(void){
     default:
         break;
     }
-    lfo2_input = (lfo2_amp * (lfo2_input >> 8)) / 128;
+    lfo2_input = (lfo2_amp * (lfo2_input >> 8)) / (128 * 2);
     if(lfo2_counter < LUTSIZE)
         lfo2_counter += lfo2_inc;
     else
@@ -789,22 +956,41 @@ void task1(void){
     }
 
     {// controls
-    /*
-    none = 0,
-    lfo1 = 1,
-    lfo2 = 2,
-    noiser = 3,
-    note = 4,
-    speed = 5,
-    pitch_w = 6,
-    mod_w = 7,
-    slider1 = 8,
-    slider2 = 9,
-    slider3 = 10,
-    slider4 = 11,
-    slider5 = 12
-    */
+    control_demux[0] = 0;
+    control_demux[1] = lfo1_output;
+    control_demux[2] = lfo2_output;
+    control_demux[3] = 0; // NOISER X
+    control_demux[4] = value_kn;
+    control_demux[5] = value_ks;
+    control_demux[6] = value_pw;
+    control_demux[7] = value_mw;
+    control_demux[8] = value_s1;
+    control_demux[9] = value_s2;
+    control_demux[10] = value_s3;
+    control_demux[11] = value_s4;
+    control_demux[12] = value_s5;
+
+    // osc1_cent_mod
+    note_cent = (int16_t)control_map((int32_t)(note_cent_raw + (control_demux[osc1_cent_mod] * 10)), -1000, 1000);
+    update_voices();
+    // osc1_trans_mod
+    note_trans = (int16_t)control_map((int32_t)(note_trans_raw + (control_demux[osc1_trans_mod])), -12, 12);
+    update_voices();
+
+    // ADSR
+    a_timer = (uint16_t)control_map((int32_t)(a_timer_raw + control_demux[a_mod]), 0, 250);
+    d_timer = (uint16_t)control_map((int32_t)(d_timer_raw + control_demux[d_mod]), 0, 250);
+    s_timer = (uint16_t)control_map((int32_t)(s_timer_raw + control_demux[s_mod]), 0, 250);
+    s_level = (uint16_t)control_map((int32_t)(s_level_raw + control_demux[sl_mod]), 0, 128);
+    r_timer = (uint16_t)control_map((int32_t)(r_timer_raw + control_demux[r_mod]), 0, 250);
+
+    // LFOs
+    lfo_freq(1, (uint16_t)control_map((int32_t)(lfo1_freq + control_demux[lfo1_fmod]), 0, 25));
+    lfo1_amp = (uint8_t)control_map((int32_t)(lfo1_amp_raw + control_demux[lfo1_amod]), 0, 100);
+    lfo_freq(2, (uint16_t)control_map((int32_t)(lfo2_freq + control_demux[lfo2_fmod]), 0, 25));
+    lfo2_amp = (uint8_t)control_map((int32_t)(lfo2_amp_raw + control_demux[lfo2_amod]), 0, 100);
     }
+
 }
 
 /* all core 1 operations will be executed in task1()
