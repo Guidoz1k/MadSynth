@@ -1,3 +1,6 @@
+# ATTENTION
+## this is a repo for a crunch project made for my graduation work. It was made in a absolute state of histeria. the quality of the code, mainly the AVR one, does not represent my coding skills. The ESP code is actually alright. I plan on the future to refactor this entire project, probably using MIDI.
+
 # MadSynth
 
  This is the repository for my synthesizer project. It's a personal project and also my bachelor's degree final work. The main goal of the project is the development of a low-cost, off-the-shelf parts based synthesizer using a jellybean microcontroller. The project is being logged in my youtube channel. Extra documentation can be found in the "docs" folder and code snippets can be accessed via links below.
