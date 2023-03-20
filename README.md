@@ -13,14 +13,14 @@
 
 
 The project was designed as follows:
-![](Docs/sch.png)
+![](imgs/sch.png)
 
 This is the final prototype:
-![](Docs/synth.png)
+![](imgs/synth.png)
 
 And this is its history:
 First version          | Second version          | Third version           | Fourth version          | Fifth version
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
 [DUE] Sample based signal gen    | [ESP32] Deep Note project     |        [ESP32]                 | [STM32H743] Used in the MES course | [AVR/ESP ] MadSynth's final version
-![](Docs/1.png) | ![](Docs/2.png) | ![](Docs/3.png) | ![](Docs/4.png) | ![](Docs/5.png)
+![](imgs/1.png) | ![](imgs/2.png) | ![](imgs/3.png) | ![](imgs/4.png) | ![](imgs/5.png)
 
