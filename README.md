@@ -13,14 +13,14 @@
 
 
 The project was designed as follows:
-![](https://i.imgur.com/YwNaNqR.png)
+![](Docs/sch.png)
 
 This is the final prototype:
-![](https://i.imgur.com/gGENgmG.png)
+![](Docs/synth.png)
 
 And this is its history:
 First version          | Second version          | Third version           | Fourth version          | Fifth version
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
 [DUE] Sample based signal gen    | [ESP32] Deep Note project     |        [ESP32]                 | [STM32H743] Used in the MES course | [AVR/ESP ] MadSynth's final version
-![](https://i.imgur.com/TdHkZdt.png) | ![](https://i.imgur.com/2VIc12S.png) | ![](https://i.imgur.com/aatGlXY.png) | ![](https://i.imgur.com/bMaZ94R.png) | ![](https://i.imgur.com/RAk690x.png)
+![](Docs/1.png) | ![](Docs/2.png) | ![](Docs/3.png) | ![](Docs/4.png) | ![](Docs/5.png)
 
