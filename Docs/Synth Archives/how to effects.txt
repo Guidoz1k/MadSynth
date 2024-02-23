@@ -1,0 +1,4 @@
+Reverb On STM32		--> https://www.youtube.com/watch?v=nRLXNmLmHqM
+Another reverb		--> https://medium.com/the-seekers-project/coding-a-basic-reverb-algorithm-part-2-an-introduction-to-audio-programming-4db79dd4e325
+And another		--> https://valhalladsp.com/2021/09/23/getting-started-with-reverb-design-part-3-online-resources/
+FIR Filter for a change --> https://www.allaboutcircuits.com/technical-articles/finite-impulse-response-filter-design-by-windowing-part-i-concepts-and-rect/

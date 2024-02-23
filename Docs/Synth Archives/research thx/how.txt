@@ -1,0 +1,13 @@
+software
+	--> high clock µCtrlr
+		--> 30 signals --> dac
+			--> sin, sqr, saw, tri
+
+vs
+
+
+hardware
+	--> module: ICL8038, XR-2206, Si5351, AD9833
+		--> comprar grande numero vs I2C address
+	--> fazer o meu: oscilador 0 - 20khz controlavel por tensao
+		--> pot eletronico ou tensao de entrada
