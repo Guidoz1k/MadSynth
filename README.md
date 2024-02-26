@@ -21,6 +21,6 @@ This is the final prototype:
 And this is its history:
 First version          | Second version          | Third version           | Fourth version          | Fifth version
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:|
-[DUE] Sample based signal gen    | [ESP32] Deep Note project     |        [ESP32]                 | [STM32H743] Used in the MES course | [AVR/ESP ] MadSynth's final version
+[DUE] Sample based signal gen    | [ESP32] Deep Note project     |        [ESP32]                 | [STM32H743] Used in the MES course | [AVR/ESP] MadSynth's final version
 ![](imgs/1.png) | ![](imgs/2.png) | ![](imgs/3.png) | ![](imgs/4.png) | ![](imgs/5.png)
 
