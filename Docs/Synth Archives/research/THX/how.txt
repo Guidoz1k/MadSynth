@@ -1,0 +1,35 @@
+software
+	--> high clock µCtrlr
+		--> 30 signals --> dac
+			--> sin, sqr, saw, tri
+
+vs
+
+hardware
+	--> module: ICL8038, XR-2206, Si5351, AD9833
+		--> comprar grande numero vs I2C address
+	--> fazer o meu: oscilador 0 - 20khz controlavel por tensao
+		--> pot eletronico ou tensao de entrada
+
+
+links:
+https://hackaday.com/2018/10/21/turning-the-deep-note-into-a-game/
+https://hackaday.io/project/161481-deep-synth
+https://www.youtube.com/watch?v=wK5Sz6IzRqE
+http://earslap.com/article/recreating-the-thx-deep-note.html
+https://www.thx.com/deep-note-trailer/
+https://en.wikipedia.org/wiki/Deep_Note
+https://github.com/kbob/deep-synth
+https://kbob.github.io/2018/09/27/deep-synth-introduction
+
+links pt2.:
+https://hackaday.com/2014/04/07/recreating-the-thx-deep-note/
+https://www.uspto.gov/sites/default/files/74309951.mp3
+https://gist.github.com/Jobarion/c371bf526d36f337e6128214dc10d8c7
+https://www.fastcompany.com/3027361/the-story-behind-the-thx-deep-note
+https://www.youtube.com/watch?v=DtqTEZJHeXU
+https://cdm.link/2015/04/thx-deep-note-creator-remade-iconic-sound/
+https://cdm.link/2015/04/thx-just-remade-deep-note-sound-awesome/
+https://www.thx.com/
+https://www.youtube.com/watch?v=bzVXFTGy2OY
+https://musicthing.blogspot.com/2005/05/tiny-music-makers-pt-3-thx-sound.html

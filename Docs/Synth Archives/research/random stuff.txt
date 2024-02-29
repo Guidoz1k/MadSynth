@@ -1,0 +1,50 @@
+https://www.youtube.com/watch?v=WXgNo5Smino
+https://stackoverflow.com/questions/5318989/reverb-algorithm
+https://www.youtube.com/channel/UCHAMx670wpXx7BKmmXSrUlQ/videos
+
+how do you put files in code?
+
+como expandir pinos?
+	expansor spi/i2c
+	http://www.openmusiclabs.com/learning/digital/input-matrix-scanning/index.html
+	74hc673
+	74HC595
+	74HC594
+	STP16C596
+
+	--> 82C55
+
+===============================================================
+
+SD card --> PSRAM
+PSRAM	--> DAC interrupt
+
+only one ESP32
+	test the time constraints
+	syncTime1-ms * ((20~25 * syncTime0) / 20~25) < 1ms
+	PINS
+
+2x ESP32	-->	1x LOLIND32PRO
+
+1 core 250µ		1 core
+	kb			250µ
+1 core 1m				kb
+	display			1m
+	dials				displays
+	buttons				dials
+	? SD-PSRAM			buttons
+	UART				? SD-PSRAM
+1 core 1m				ADST
+	ADSR				FM
+	FM				? LFO
+	? LFOs			
+	UART		1 core
+1 core 20~25µ			20~25µ
+	I²S				I²S
+	LUT				LUT
+	?filter				?filter
+	FX				FX
+	? PSRAM-DAC			? PSRAM-DAC
+
+===================================================================
+
