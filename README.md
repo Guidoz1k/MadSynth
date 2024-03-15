@@ -1,5 +1,5 @@
 # ATTENTION
-## this is a repo for a crunch project made for my graduation work. It was made in a absolute state of histeria. the quality of the code, mainly the AVR one, does not represent my coding skills. The ESP code is actually alright. The second version of the project, with much better documentation and code, a teensy 4.1 and MIDI communication, can be found [here](https://github.com/Guidoz1k/MadSynth2).
+## This is a repo for a crunch project made for my graduation work. It was made in a absolute state of histeria. The quality of the code, mainly the AVR one, does not represent my coding skills. The ESP code is actually alright. The second version of the project, with much better documentation and code, a teensy 4.1 and MIDI communication, can be found [here](https://github.com/Guidoz1k/MadSynth2).
 
 # MadSynth
 
